@@ -1,0 +1,854 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch</source>
+    <date>Tuesday, November 17, 2020 at 04:49:12 AM</date>
+    <tool>Eeschema (5.99.0-3294-g9c46e491e)</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>Indoor GPS Mobile Tag</title>
+        <company>Kelley Industries</company>
+        <rev>Mk 1</rev>
+        <date>2020-10-20</date>
+        <source>mobile-tag.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="BreakoutConnector1">
+      <value>Conn_01x08_Female</value>
+      <footprint>Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Horizontal</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x08_Female" description="Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Vendor" value=""/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>8b6033d5-f944-4d25-b500-93708265f8a5</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>10uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C15850</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C15850"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>8e2d077f-abc3-4a5f-9040-fc305a56d125</tstamp>
+    </comp>
+    <comp ref="C2">
+      <value>10uF</value>
+      <footprint>Capacitor_THT:C_Radial_D5.0mm_H5.0mm_P2.00mm</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C15850</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C15850"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>23c42945-79f9-456e-9dfd-521a1c21de2e</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>0.1uF</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C49678</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C49678"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>939f9606-b9e3-48b7-9465-2b8204827255</tstamp>
+    </comp>
+    <comp ref="D1">
+      <value>D</value>
+      <footprint>Diode_THT:D_5W_P10.16mm_Horizontal</footprint>
+      <datasheet>https://www.adafruit.com/product/755</datasheet>
+      <fields>
+        <field name="JLCPCB">C22452</field>
+      </fields>
+      <libsource lib="Device" part="D" description="Diode"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C22452"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>eebfb460-cd0c-4d3e-bd74-c313f96434d3</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Castellated</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C34499</field>
+      </fields>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C34499"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>e9d0e02e-a312-40ac-8047-ab84471fb29f</tstamp>
+    </comp>
+    <comp ref="D3">
+      <value>LED</value>
+      <footprint>LED_THT:LED_D3.0mm</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C34499</field>
+      </fields>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C34499"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>464f9fd4-7cea-4050-a30b-dbe00334bef6</tstamp>
+    </comp>
+    <comp ref="D4">
+      <value>LED</value>
+      <footprint>LED_THT:LED_D3.0mm</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C34499</field>
+      </fields>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C34499"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>4a7e7fa3-706f-4df0-9f79-fe66ed436f43</tstamp>
+    </comp>
+    <comp ref="DC_Converter1">
+      <value>LD1117S12TR_SOT223</value>
+      <footprint>Package_TO_SOT_SMD:SOT-223-3_TabPin2</footprint>
+      <datasheet>http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00000544.pdf</datasheet>
+      <fields>
+        <field name="JLCPCB">C116068</field>
+      </fields>
+      <libsource lib="Regulator_Linear" part="LD1117S12TR_SOT223" description="800mA Fixed Low Drop Positive Voltage Regulator, Fixed Output 1.2V, SOT-223"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C116068"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>d0a06284-6b86-462b-93ec-b6193259d818</tstamp>
+    </comp>
+    <comp ref="Display1">
+      <value>128x64OLED</value>
+      <footprint>Display:Adafruit_SSD1306</footprint>
+      <libsource lib="mobile-tag-schematics" part="128x64OLED" description=""/>
+      <property name="Vendor" value=""/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>94e94370-a0ce-4eb8-bc44-507cc4a6f32a</tstamp>
+    </comp>
+    <comp ref="J1">
+      <value>SWD_Cable_Connector</value>
+      <footprint>Connector_PinHeader_1.00mm:PinHeader_2x05_P1.00mm_Vertical_SMD</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="mobile-tag-schematics" part="SWD_Cable_Connector" description="Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Vendor" value=""/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>f4d3cb87-eb9f-46e5-9a59-d4d08b1e330b</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>USB_B_Micro</value>
+      <footprint>Connector_USB:USB_Micro-B_Wuerth_629105150521</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="USB_B_Micro" description="USB Micro Type B connector"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>ae0bc2c4-9414-4d61-bdc8-a4060c64e08a</tstamp>
+    </comp>
+    <comp ref="Nav_Switch1">
+      <value>SKQUCAA010</value>
+      <footprint>SKQUCAA010</footprint>
+      <datasheet>https://www.mouser.co.uk/datasheet/2/15/skqu-1155891.pdf</datasheet>
+      <fields>
+        <field name="Description">Alps, SKQUCAA010, 2 Way Joystick Switch Plunger, Momentary, 12V dc</field>
+        <field name="Height">10</field>
+        <field name="Manufacturer_Name">ALPS</field>
+        <field name="Manufacturer_Part_Number">SKQUCAA010</field>
+        <field name="Mouser Part Number">688-SKQUCA</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/ALPS/SKQUCAA010?qs=N5Jky1br14PIN8L1H%2F2niA%3D%3D</field>
+      </fields>
+      <libsource lib="mobile-tag-schematics" part="SKQUCAA010" description="Alps, SKQUCAA010, 2 Way Joystick Switch Plunger, Momentary, 12V dc"/>
+      <property name="Description" value="Alps, SKQUCAA010, 2 Way Joystick Switch Plunger, Momentary, 12V dc"/>
+      <property name="Height" value="10"/>
+      <property name="Manufacturer_Name" value="ALPS"/>
+      <property name="Manufacturer_Part_Number" value="SKQUCAA010"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Part Number" value="688-SKQUCA"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/ALPS/SKQUCAA010?qs=N5Jky1br14PIN8L1H%2F2niA%3D%3D"/>
+      <property name="Vendor" value=""/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>feaf2529-0285-4b9d-80a9-18943ae9e8c2</tstamp>
+    </comp>
+    <comp ref="PwrIn1">
+      <value>CR2450 Coin Cell</value>
+      <footprint>Battery:BatteryHolder_Keystone_3009_1x2450</footprint>
+      <fields>
+        <field name="Vendor">Ada</field>
+      </fields>
+      <libsource lib="mobile-tag-schematics" part="CoinCellBreakoutOnOff" description=""/>
+      <property name="Vendor" value="Ada"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>3563d0b2-2a09-4ca2-a8dc-680b0bf3afbb</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>100</value>
+      <footprint>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Vertical</footprint>
+      <datasheet>1k</datasheet>
+      <fields>
+        <field name="Arrow Price/Stock">~</field>
+        <field name="JLCPCB">C17901</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Vendor" value=""/>
+      <property name="Arrow Price/Stock" value="~"/>
+      <property name="JLCPCB" value="C17901"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>17d8247d-8e29-413f-8133-46b8fd3a5e19</tstamp>
+    </comp>
+    <comp ref="R2">
+      <value>100</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder</footprint>
+      <datasheet>1k</datasheet>
+      <fields>
+        <field name="Arrow Price/Stock">~</field>
+        <field name="JLCPCB">C17901</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Vendor" value=""/>
+      <property name="Arrow Price/Stock" value="~"/>
+      <property name="JLCPCB" value="C17901"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>e979c69f-0da4-4a54-a252-3e602e573f92</tstamp>
+    </comp>
+    <comp ref="R3">
+      <value>100</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C17901</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Vendor" value=""/>
+      <property name="JLCPCB" value="C17901"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>fc10a48f-1000-445a-98d5-c7316c8231a6</tstamp>
+    </comp>
+    <comp ref="R4">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder</footprint>
+      <datasheet>1k</datasheet>
+      <fields>
+        <field name="Arrow Price/Stock">~</field>
+        <field name="JLCPCB">C17902</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Vendor" value=""/>
+      <property name="Arrow Price/Stock" value="~"/>
+      <property name="JLCPCB" value="C17902"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>ca749ff7-1112-4636-84f6-305636e915cf</tstamp>
+    </comp>
+    <comp ref="RESET_SW1">
+      <value>Push Button</value>
+      <footprint>Button_Switch_THT:SW_PUSH_6mm_H5mm</footprint>
+      <datasheet>https://www.adafruit.com/product/367</datasheet>
+      <libsource lib="Switch" part="SW_Push" description="Push button switch, generic, two pins"/>
+      <property name="Vendor" value=""/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>effebb52-d5a7-4c55-81cd-4733146700b4</tstamp>
+    </comp>
+    <comp ref="RN1">
+      <value>R_Pack04</value>
+      <footprint>Resistor_SMD:R_Array_Convex_4x0603</footprint>
+      <datasheet>~</datasheet>
+      <fields>
+        <field name="JLCPCB">C29718</field>
+      </fields>
+      <libsource lib="Device" part="R_Pack04" description="4 resistor network, parallel topology"/>
+      <property name="JLCPCB" value="C29718"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>137b2e40-81c6-46b2-b2ca-fdec26d8dd44</tstamp>
+    </comp>
+    <comp ref="U1">
+      <value>DWM1001</value>
+      <footprint>RF_Module:DecaWave_DWM1001</footprint>
+      <datasheet>https://www.decawave.com/sites/default/files/dwm1001_datasheet.pdf</datasheet>
+      <fields>
+        <field name="Vendor">Decawave</field>
+      </fields>
+      <libsource lib="RF_Module" part="DWM1001" description=" Ultra wide band RF module With ranging location capabilities, I2C, UART, SPI, +2.8V to +3.6V VCC"/>
+      <property name="Vendor" value="Decawave"/>
+      <property name="Sheet name" value=""/>
+      <property name="Sheet file" value="/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>e66377eb-9f93-43b5-8867-9a73497f44cd</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector" part="Conn_01x08_Female">
+      <description>Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x08_Female</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector" part="USB_B_Micro">
+      <description>USB Micro Type B connector</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>USB*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">USB_B_Micro</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VBUS" type="power_out"/>
+        <pin num="2" name="D-" type="passive"/>
+        <pin num="3" name="D+" type="passive"/>
+        <pin num="4" name="ID" type="passive"/>
+        <pin num="5" name="GND" type="power_out"/>
+        <pin num="6" name="Shield" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="D">
+      <description>Diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED">
+      <description>Light emitting diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R_Pack04">
+      <description>4 resistor network, parallel topology</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>DIP*</fp>
+        <fp>SOIC*</fp>
+        <fp>R*Array*Concave*</fp>
+        <fp>R*Array*Convex*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">RN</field>
+        <field name="Value">R_Pack04</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="R1.1" type="passive"/>
+        <pin num="2" name="R2.1" type="passive"/>
+        <pin num="3" name="R3.1" type="passive"/>
+        <pin num="4" name="R4.1" type="passive"/>
+        <pin num="5" name="R4.2" type="passive"/>
+        <pin num="6" name="R3.2" type="passive"/>
+        <pin num="7" name="R2.2" type="passive"/>
+        <pin num="8" name="R1.2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="RF_Module" part="DWM1001">
+      <description> Ultra wide band RF module With ranging location capabilities, I2C, UART, SPI, +2.8V to +3.6V VCC</description>
+      <docs>https://www.decawave.com/sites/default/files/dwm1001_datasheet.pdf</docs>
+      <footprints>
+        <fp>*DWM1001*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">DWM1001</field>
+        <field name="Footprint">RF_Module:DecaWave_DWM1001</field>
+        <field name="Datasheet">https://www.decawave.com/sites/default/files/dwm1001_datasheet.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="power_in"/>
+        <pin num="2" name="SWD_CLK" type="input"/>
+        <pin num="3" name="SWD_DIO" type="BiDi"/>
+        <pin num="4" name="GPIO_10" type="BiDi"/>
+        <pin num="5" name="GPIO_9" type="BiDi"/>
+        <pin num="6" name="GPIO_12" type="BiDi"/>
+        <pin num="7" name="GPIO_14" type="BiDi"/>
+        <pin num="8" name="GPIO_22" type="BiDi"/>
+        <pin num="9" name="GPIO_31" type="BiDi"/>
+        <pin num="10" name="GPIO_30" type="BiDi"/>
+        <pin num="11" name="GND" type="passive"/>
+        <pin num="12" name="VCC" type="power_in"/>
+        <pin num="13" name="GPIO_27" type="BiDi"/>
+        <pin num="14" name="I2C_SDA" type="BiDi"/>
+        <pin num="15" name="I2C_SCL" type="output"/>
+        <pin num="16" name="GPIO_23" type="BiDi"/>
+        <pin num="17" name="GPIO_13" type="BiDi"/>
+        <pin num="18" name="UART_RX" type="input"/>
+        <pin num="19" name="READY" type="output"/>
+        <pin num="20" name="UART_TX" type="output"/>
+        <pin num="21" name="GPIO_1" type="BiDi"/>
+        <pin num="22" name="GPIO_0" type="BiDi"/>
+        <pin num="23" name="GPIO_15" type="BiDi"/>
+        <pin num="24" name="GND" type="passive"/>
+        <pin num="25" name="GPIO_8" type="BiDi"/>
+        <pin num="26" name="SPIS_MISO" type="output"/>
+        <pin num="27" name="SPIS_MOSI" type="3state"/>
+        <pin num="28" name="SPIS_CLK" type="input"/>
+        <pin num="29" name="~SPIS_CS" type="input"/>
+        <pin num="30" name="GPIO_3" type="BiDi"/>
+        <pin num="31" name="GPIO_2" type="BiDi"/>
+        <pin num="32" name="BT_WAKE_UP" type="input"/>
+        <pin num="33" name="~RESET" type="input"/>
+        <pin num="34" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Regulator_Linear" part="LD1117S12TR_SOT223">
+      <description>800mA Fixed Low Drop Positive Voltage Regulator, Fixed Output 1.2V, SOT-223</description>
+      <docs>http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00000544.pdf</docs>
+      <footprints>
+        <fp>SOT?223*TabPin2*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LD1117S12TR_SOT223</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-223-3_TabPin2</field>
+        <field name="Datasheet">http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00000544.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="power_in"/>
+        <pin num="2" name="VO" type="power_out"/>
+        <pin num="3" name="VI" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_Push">
+      <description>Push button switch, generic, two pins</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_Push</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="mobile-tag-schematics" part="128x64OLED_1">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">128x64OLED</field>
+      </fields>
+      <pins>
+        <pin num="1" name="SDA" type="BiDi"/>
+        <pin num="2" name="SCK" type="BiDi"/>
+        <pin num="3" name="SAD" type="BiDi"/>
+        <pin num="4" name="RST" type="BiDi"/>
+        <pin num="5" name="CS" type="BiDi"/>
+        <pin num="6" name="3.3V" type="BiDi"/>
+        <pin num="7" name="VIN" type="BiDi"/>
+        <pin num="8" name="GND" type="BiDi"/>
+      </pins>
+    </libpart>
+    <libpart lib="mobile-tag-schematics" part="CoinCellBreakoutOnOff">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">CoinCellBreakoutOnOff</field>
+      </fields>
+      <pins>
+        <pin num="1" name="On" type="BiDi"/>
+        <pin num="2" name="Gnd" type="BiDi"/>
+      </pins>
+    </libpart>
+    <libpart lib="mobile-tag-schematics" part="SKQUCAA010_1">
+      <description>Alps, SKQUCAA010, 2 Way Joystick Switch Plunger, Momentary, 12V dc</description>
+      <docs>https://www.mouser.co.uk/datasheet/2/15/skqu-1155891.pdf</docs>
+      <fields>
+        <field name="Reference">S</field>
+        <field name="Value">SKQUCAA010</field>
+        <field name="Footprint">SKQUCAA010</field>
+        <field name="Datasheet">https://www.mouser.co.uk/datasheet/2/15/skqu-1155891.pdf</field>
+        <field name="Description">Alps, SKQUCAA010, 2 Way Joystick Switch Plunger, Momentary, 12V dc</field>
+        <field name="Height">10</field>
+        <field name="Manufacturer_Name">ALPS</field>
+        <field name="Manufacturer_Part_Number">SKQUCAA010</field>
+        <field name="Mouser Part Number">688-SKQUCA</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/ALPS/SKQUCAA010?qs=N5Jky1br14PIN8L1H%2F2niA%3D%3D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive"/>
+        <pin num="2" name="B" type="passive"/>
+        <pin num="3" name="C" type="passive"/>
+        <pin num="4" name="Common" type="passive"/>
+        <pin num="5" name="D" type="passive"/>
+        <pin num="6" name="Center" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="mobile-tag-schematics" part="SWD_Cable_Connector">
+      <description>Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_2x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">SWD_Cable_Connector</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VRef" type="passive"/>
+        <pin num="2" name="SWIO" type="passive"/>
+        <pin num="3" name="GND" type="passive"/>
+        <pin num="4" name="CLK" type="passive"/>
+        <pin num="5" name="GND" type="passive"/>
+        <pin num="6" name="SWO" type="passive"/>
+        <pin num="7" name="KEY" type="passive"/>
+        <pin num="8" name="NC" type="passive"/>
+        <pin num="9" name="GND" type="passive"/>
+        <pin num="10" name="~RST" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector">
+      <uri>/Library/Application Support/kicad/library/Connector.lib</uri>
+    </library>
+    <library logical="Device">
+      <uri>/Library/Application Support/kicad/library/Device.lib</uri>
+    </library>
+    <library logical="RF_Module">
+      <uri>/Library/Application Support/kicad/library/RF_Module.lib</uri>
+    </library>
+    <library logical="Regulator_Linear">
+      <uri>/Library/Application Support/kicad/library/Regulator_Linear.lib</uri>
+    </library>
+    <library logical="Switch">
+      <uri>/Library/Application Support/kicad/library/Switch.lib</uri>
+    </library>
+    <library logical="mobile-tag-schematics">
+      <uri>/Users/jonkelley/Development/LEAF/leaf/packages/mobile-tag/mobile-tag-schematics.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3V3">
+      <node ref="C2" pin="1"/>
+      <node ref="C3" pin="1"/>
+      <node ref="D1" pin="1" pinfunction="K"/>
+      <node ref="DC_Converter1" pin="2" pinfunction="VO"/>
+      <node ref="Display1" pin="6" pinfunction="3.3V"/>
+      <node ref="J1" pin="1" pinfunction="VRef"/>
+      <node ref="R4" pin="1"/>
+      <node ref="RN1" pin="5" pinfunction="R4.2"/>
+      <node ref="RN1" pin="6" pinfunction="R3.2"/>
+      <node ref="RN1" pin="7" pinfunction="R2.2"/>
+      <node ref="RN1" pin="8" pinfunction="R1.2"/>
+      <node ref="U1" pin="12" pinfunction="VCC"/>
+    </net>
+    <net code="2" name="+5V">
+      <node ref="BreakoutConnector1" pin="7" pinfunction="Pin_7"/>
+      <node ref="C1" pin="1"/>
+      <node ref="DC_Converter1" pin="3" pinfunction="VI"/>
+      <node ref="J2" pin="1" pinfunction="VBUS"/>
+    </net>
+    <net code="3" name="GND">
+      <node ref="BreakoutConnector1" pin="8" pinfunction="Pin_8"/>
+      <node ref="C1" pin="2"/>
+      <node ref="C2" pin="2"/>
+      <node ref="C3" pin="2"/>
+      <node ref="D2" pin="1" pinfunction="K"/>
+      <node ref="D3" pin="1" pinfunction="K"/>
+      <node ref="D4" pin="1" pinfunction="K"/>
+      <node ref="DC_Converter1" pin="1" pinfunction="GND"/>
+      <node ref="Display1" pin="8" pinfunction="GND"/>
+      <node ref="J1" pin="9" pinfunction="GND"/>
+      <node ref="J2" pin="5" pinfunction="GND"/>
+      <node ref="Nav_Switch1" pin="4" pinfunction="Common"/>
+      <node ref="PwrIn1" pin="2" pinfunction="Gnd"/>
+      <node ref="RESET_SW1" pin="2" pinfunction="2"/>
+      <node ref="U1" pin="1" pinfunction="GND"/>
+      <node ref="U1" pin="11" pinfunction="GND"/>
+      <node ref="U1" pin="24" pinfunction="GND"/>
+      <node ref="U1" pin="34" pinfunction="GND"/>
+    </net>
+    <net code="4" name="LED1">
+      <node ref="R1" pin="2"/>
+      <node ref="U1" pin="6" pinfunction="GPIO_12"/>
+    </net>
+    <net code="5" name="LED2">
+      <node ref="R2" pin="2"/>
+      <node ref="U1" pin="5" pinfunction="GPIO_9"/>
+    </net>
+    <net code="6" name="LED3">
+      <node ref="R3" pin="2"/>
+      <node ref="U1" pin="4" pinfunction="GPIO_10"/>
+    </net>
+    <net code="7" name="Net-(BreakoutConnector1-Pad1)">
+      <node ref="BreakoutConnector1" pin="1" pinfunction="Pin_1"/>
+      <node ref="U1" pin="18" pinfunction="UART_RX"/>
+    </net>
+    <net code="8" name="Net-(BreakoutConnector1-Pad2)">
+      <node ref="BreakoutConnector1" pin="2" pinfunction="Pin_2"/>
+      <node ref="U1" pin="20" pinfunction="UART_TX"/>
+    </net>
+    <net code="9" name="Net-(BreakoutConnector1-Pad3)">
+      <node ref="BreakoutConnector1" pin="3" pinfunction="Pin_3"/>
+      <node ref="U1" pin="26" pinfunction="SPIS_MISO"/>
+    </net>
+    <net code="10" name="Net-(BreakoutConnector1-Pad4)">
+      <node ref="BreakoutConnector1" pin="4" pinfunction="Pin_4"/>
+      <node ref="U1" pin="27" pinfunction="SPIS_MOSI"/>
+    </net>
+    <net code="11" name="Net-(BreakoutConnector1-Pad5)">
+      <node ref="BreakoutConnector1" pin="5" pinfunction="Pin_5"/>
+      <node ref="U1" pin="28" pinfunction="SPIS_CLK"/>
+    </net>
+    <net code="12" name="Net-(BreakoutConnector1-Pad6)">
+      <node ref="BreakoutConnector1" pin="6" pinfunction="Pin_6"/>
+      <node ref="U1" pin="29" pinfunction="~SPIS_CS"/>
+    </net>
+    <net code="13" name="Net-(D1-Pad2)">
+      <node ref="D1" pin="2" pinfunction="A"/>
+      <node ref="PwrIn1" pin="1" pinfunction="On"/>
+    </net>
+    <net code="14" name="Net-(D2-Pad2)">
+      <node ref="D2" pin="2" pinfunction="A"/>
+      <node ref="R1" pin="1"/>
+    </net>
+    <net code="15" name="Net-(D3-Pad2)">
+      <node ref="D3" pin="2" pinfunction="A"/>
+      <node ref="R2" pin="1"/>
+    </net>
+    <net code="16" name="Net-(D4-Pad2)">
+      <node ref="D4" pin="2" pinfunction="A"/>
+      <node ref="R3" pin="1"/>
+    </net>
+    <net code="17" name="Net-(Display1-Pad3)">
+      <node ref="Display1" pin="3" pinfunction="SAD"/>
+    </net>
+    <net code="18" name="Net-(Display1-Pad4)">
+      <node ref="Display1" pin="4" pinfunction="RST"/>
+    </net>
+    <net code="19" name="Net-(Display1-Pad5)">
+      <node ref="Display1" pin="5" pinfunction="CS"/>
+    </net>
+    <net code="20" name="Net-(Display1-Pad7)">
+      <node ref="Display1" pin="7" pinfunction="VIN"/>
+    </net>
+    <net code="21" name="Net-(J1-Pad2)">
+      <node ref="J1" pin="2" pinfunction="SWIO"/>
+    </net>
+    <net code="22" name="Net-(J1-Pad3)">
+      <node ref="J1" pin="3" pinfunction="GND"/>
+      <node ref="J1" pin="5" pinfunction="GND"/>
+    </net>
+    <net code="23" name="Net-(J1-Pad7)">
+      <node ref="J1" pin="7" pinfunction="KEY"/>
+    </net>
+    <net code="24" name="Net-(J1-Pad8)">
+      <node ref="J1" pin="8" pinfunction="NC"/>
+    </net>
+    <net code="25" name="Net-(J2-Pad2)">
+      <node ref="J2" pin="2" pinfunction="D-"/>
+    </net>
+    <net code="26" name="Net-(J2-Pad3)">
+      <node ref="J2" pin="3" pinfunction="D+"/>
+    </net>
+    <net code="27" name="Net-(J2-Pad4)">
+      <node ref="J2" pin="4" pinfunction="ID"/>
+    </net>
+    <net code="28" name="Net-(J2-Pad6)">
+      <node ref="J2" pin="6" pinfunction="Shield"/>
+    </net>
+    <net code="29" name="Net-(U1-Pad13)">
+      <node ref="U1" pin="13" pinfunction="GPIO_27"/>
+    </net>
+    <net code="30" name="Net-(U1-Pad16)">
+      <node ref="U1" pin="16" pinfunction="GPIO_23"/>
+    </net>
+    <net code="31" name="Net-(U1-Pad19)">
+      <node ref="U1" pin="19" pinfunction="READY"/>
+    </net>
+    <net code="32" name="Net-(U1-Pad21)">
+      <node ref="U1" pin="21" pinfunction="GPIO_1"/>
+    </net>
+    <net code="33" name="Net-(U1-Pad22)">
+      <node ref="U1" pin="22" pinfunction="GPIO_0"/>
+    </net>
+    <net code="34" name="Net-(U1-Pad23)">
+      <node ref="U1" pin="23" pinfunction="GPIO_15"/>
+    </net>
+    <net code="35" name="Net-(U1-Pad25)">
+      <node ref="U1" pin="25" pinfunction="GPIO_8"/>
+    </net>
+    <net code="36" name="Net-(U1-Pad30)">
+      <node ref="U1" pin="30" pinfunction="GPIO_3"/>
+    </net>
+    <net code="37" name="Net-(U1-Pad31)">
+      <node ref="U1" pin="31" pinfunction="GPIO_2"/>
+    </net>
+    <net code="38" name="Net-(U1-Pad32)">
+      <node ref="U1" pin="32" pinfunction="BT_WAKE_UP"/>
+    </net>
+    <net code="39" name="SCL{slash}I2c">
+      <node ref="Display1" pin="2" pinfunction="SCK"/>
+      <node ref="U1" pin="15" pinfunction="I2C_SCL"/>
+    </net>
+    <net code="40" name="SDA{slash}I2C">
+      <node ref="Display1" pin="1" pinfunction="SDA"/>
+      <node ref="U1" pin="14" pinfunction="I2C_SDA"/>
+    </net>
+    <net code="41" name="SWD_CLK">
+      <node ref="J1" pin="4" pinfunction="CLK"/>
+      <node ref="U1" pin="2" pinfunction="SWD_CLK"/>
+    </net>
+    <net code="42" name="SWD_DIO">
+      <node ref="J1" pin="6" pinfunction="SWO"/>
+      <node ref="U1" pin="3" pinfunction="SWD_DIO"/>
+    </net>
+    <net code="43" name="SW_DOWN">
+      <node ref="Nav_Switch1" pin="3" pinfunction="C"/>
+      <node ref="RN1" pin="1" pinfunction="R1.1"/>
+      <node ref="U1" pin="7" pinfunction="GPIO_14"/>
+    </net>
+    <net code="44" name="SW_LEFT">
+      <node ref="Nav_Switch1" pin="2" pinfunction="B"/>
+      <node ref="RN1" pin="2" pinfunction="R2.1"/>
+      <node ref="U1" pin="8" pinfunction="GPIO_22"/>
+    </net>
+    <net code="45" name="SW_RIGHT">
+      <node ref="Nav_Switch1" pin="5" pinfunction="D"/>
+      <node ref="RN1" pin="4" pinfunction="R4.1"/>
+      <node ref="U1" pin="10" pinfunction="GPIO_30"/>
+    </net>
+    <net code="46" name="SW_SELECT">
+      <node ref="Nav_Switch1" pin="6" pinfunction="Center"/>
+      <node ref="R4" pin="2"/>
+      <node ref="U1" pin="17" pinfunction="GPIO_13"/>
+    </net>
+    <net code="47" name="SW_UP">
+      <node ref="Nav_Switch1" pin="1" pinfunction="A"/>
+      <node ref="RN1" pin="3" pinfunction="R3.1"/>
+      <node ref="U1" pin="9" pinfunction="GPIO_31"/>
+    </net>
+    <net code="48" name="~RESET">
+      <node ref="J1" pin="10" pinfunction="~RST"/>
+      <node ref="RESET_SW1" pin="1" pinfunction="1"/>
+      <node ref="U1" pin="33" pinfunction="~RESET"/>
+    </net>
+  </nets>
+</export>

@@ -1,0 +1,57 @@
+[package]
+name = "nrf-tests"
+version = "0.1.0"
+authors = ["Jonathan Kelley <jkelleyrtp@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# ssd1306 = "0.4.0"
+# panic-halt = "0.2.0"
+# embedded-graphics = "0.6.2"
+cortex-m = "0.6.3"
+cortex-m-rt = "0.6.12"
+nrf52832-hal = { version = "0.12.0", features = ["rt"] }
+# nrf52840-hal = "0.11.0"
+# panic-semihosting = "0.5.6"
+
+# defmt = { git = "https://github.com/knurling-rs/defmt", rev = "1bb6478544a7188b2e7f3ac21939f58f50d56b9f" }
+# defmt-rtt = { git = "https://github.com/knurling-rs/defmt", rev = "1bb6478544a7188b2e7f3ac21939f58f50d56b9f" }
+
+# panic-probe = { git = "https://github.com/knurling-rs/defmt", rev = "1bb6478544a7188b2e7f3ac21939f58f50d56b9f", features = ["print-defmt"] }
+rtt-target = { version = "0.2.0", features = ["cortex-m"] }
+
+# [dependencies.embedded-hal]
+# version = "0.2.3"
+# features = ["unproven"]
+
+
+# [features]
+# defmt-default = []
+# defmt-trace = []
+# defmt-debug = []
+# defmt-info = []
+# defmt-warn = []
+# defmt-error = []
+# default = [
+#     "defmt-default", # <- ADD this feature
+# ]
+
+
+[profile.dev]
+codegen-units = 1 
+debug = 2 
+debug-assertions = true # <-
+incremental = false 
+opt-level = 3 # <-
+overflow-checks = true # <-
+
+[profile.release]
+codegen-units = 1 
+debug = 2 
+debug-assertions = false # <-
+incremental = false 
+lto = 'fat' 
+opt-level = 3 # <-
+overflow-checks = false # <-

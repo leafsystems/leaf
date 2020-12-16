@@ -1,0 +1,13 @@
+# [tasks.buildgateway]
+# command = "cargo"
+# args = ["build", "--release", "--target", "arm-unknown-linux-musleabihf"]
+
+# [tasks.scpgateway]
+# command = "scp"
+# args = [
+#     "target/arm-unknown-linux-musleabihf/release/gateway",
+#     "pi@raspberrypi.local:~/main",
+# ]
+
+# [tasks.deploygateway]
+# run_task = { name = ["buildgateway", "scpgateway"] }

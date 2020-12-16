@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name "rmwc-common")(type "KiCad")(uri "/Users/jonkelley/Development/Olin/RealWorldMicroControllers-FA2020/rwmc-project/packages/pcb-common/rmwc-common.kicad_sym")(options "")(descr ""))
+  (lib (name "mobile-tag-schematics")(type "KiCad")(uri "${KIPRJMOD}/mobile-tag-schematics.kicad_sym")(options "")(descr ""))
+)
