@@ -4,7 +4,16 @@ members = [
     "packages/gateway",
     "packages/ingestor",
     "packages/common-interfaces",
+    # "packages/nrf-tests",
+    # "packages/ranging-firmware",
 ]
+exclude = ["packages/ranging-firmware", "packages/nrf-tests"]
+# members = [
+#     "packages/web-viewer",
+#     "packages/gateway",
+#     "packages/ingestor",
+#     "packages/common-interfaces",
+# ]
 # members = ["packages/web-viewer", "packages/gateway"]
 # members = ["packages/gateway", "packages/nrf-tests"]
 

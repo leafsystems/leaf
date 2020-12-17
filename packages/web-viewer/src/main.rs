@@ -1,6 +1,7 @@
 // mod hooks;
 mod api;
 mod app;
+mod hooks;
 mod util;
 
 // Called when the wasm module is instantiated

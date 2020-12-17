@@ -7,51 +7,51 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# ssd1306 = "0.4.0"
-# panic-halt = "0.2.0"
-# embedded-graphics = "0.6.2"
+# cortex-m-rt = { version = "0.6.12", optional = true }
+# cortex-m-semihosting = "0.3.5"
+embedded-hal = { version = "0.2.4", features = ["unproven"] }
 cortex-m = "0.6.3"
 cortex-m-rt = "0.6.12"
-nrf52832-hal = { version = "0.12.0", features = ["rt"] }
-# nrf52840-hal = "0.11.0"
-# panic-semihosting = "0.5.6"
+# nrf52840-hal = "0.12.0"
+# nrf52832-hal = "0.12.0"
+defmt = { git = "https://github.com/knurling-rs/defmt", rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
+defmt-rtt = { git = "https://github.com/knurling-rs/defmt", rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
+# panic-probe = { git = "https://github.com/knurling-rs/defmt", features = ["print-defmt"], rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
+# dwm1001 = { git = "https://github.com/braun-embedded/rust-dw1000", features = ["rt"] }
+dwm1001 = { git = "https://github.com/braun-embedded/rust-dw1000", features = ["rt", "dev"] }
+lis2dh12 = "0.6.0"
+nb = "1.0.0"
+# embedded-hal = "0.2.4"
+# rtt-target = "0.3.0"
+# ONLY pin this dependency if you are using the `print-defmt` feature
+# defmt = { git = "https://github.com/knurling-rs/defmt", branch = "main" }
+# defmt-rtt = { git = "https://github.com/knurling-rs/defmt", branch = "main" }
+[dev-dependencies]
+heapless = "0.5.5"
+nb = "1.0.0"
 
-# defmt = { git = "https://github.com/knurling-rs/defmt", rev = "1bb6478544a7188b2e7f3ac21939f58f50d56b9f" }
-# defmt-rtt = { git = "https://github.com/knurling-rs/defmt", rev = "1bb6478544a7188b2e7f3ac21939f58f50d56b9f" }
+[features]
+# set logging levels here
+default = ["defmt-default"]
 
-# panic-probe = { git = "https://github.com/knurling-rs/defmt", rev = "1bb6478544a7188b2e7f3ac21939f58f50d56b9f", features = ["print-defmt"] }
-rtt-target = { version = "0.2.0", features = ["cortex-m"] }
-
-# [dependencies.embedded-hal]
-# version = "0.2.3"
-# features = ["unproven"]
-
-
-# [features]
-# defmt-default = []
-# defmt-trace = []
-# defmt-debug = []
-# defmt-info = []
-# defmt-warn = []
-# defmt-error = []
-# default = [
-#     "defmt-default", # <- ADD this feature
-# ]
-
+# do NOT modify these features
+defmt-default = []
+defmt-trace = []
+defmt-debug = []
+defmt-info = []
+defmt-warn = []
+defmt-error = []
 
 [profile.dev]
-codegen-units = 1 
-debug = 2 
-debug-assertions = true # <-
+debug = 1 # default is `true`; not needed if not already overridden
 incremental = false 
-opt-level = 3 # <-
-overflow-checks = true # <-
+codegen-units = 1 
+lto = true 
+opt-level = 1 
 
 [profile.release]
-codegen-units = 1 
-debug = 2 
-debug-assertions = false # <-
-incremental = false 
-lto = 'fat' 
-opt-level = 3 # <-
-overflow-checks = false # <-
+debug = 1 # default is `false`; using `true` is also OK
+# incremental = false 
+# codegen-units = 1 
+# lto = true 
+# opt-level = 3

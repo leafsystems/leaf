@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-use core::str;
 use cortex_m_rt::entry;
 
 use dwm1001::{
@@ -41,13 +40,10 @@ fn main() -> ! {
 
         let mut buffer = [0; 1024];
 
-        defmt::info!("Receving started!");
         // Set timer for timeout
         timer.start(5_000_000u32);
 
         let result = block_timeout!(&mut timer, receiving.wait(&mut buffer));
-
-        defmt::info!("Timeout completed!");
 
         dw1000 = receiving
             .finish_receiving()
@@ -93,15 +89,15 @@ fn main() -> ! {
         dwm1001.leds.D9.disable();
 
         defmt::info!("Received frame!");
-        let s = match str::from_utf8(message.frame.payload) {
-            // let s = match str::from_utf8(buf) {
-            Ok(v) => {
-                defmt::info!("Message: {:?}", v);
-            }
-            Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-        };
+        // message.frame.payload
+        defmt::info!("{:?}!", message.frame.payload);
 
-        // defmt::info!("Received frame: {:?}\n", message.frame.payload);
+        // let b = b
+        match dwm1001.uart.write(message.frame.payload) {
+            Ok(_) => {}
+            Err(e) => defmt::info!("writing to uart failed"),
+        }
+        // defmt::info!("{}!", message.);
         // print!("Received frame: {:x?}\n", message.frame);
     }
 }
