@@ -19,7 +19,6 @@ pub async fn app() -> Result<(), std::io::Error> {
     app.at("/count").get(count);
 
     let addr = "0.0.0.0:9001";
-    // let addr = "127.0.0.1:9001";
     log::info!("Congrats! Server is up and running at http://{}", addr);
     app.listen(addr).await?;
 
@@ -54,8 +53,8 @@ async fn ring(req: ServerRequest) -> tide::Result<String> {
 }
 
 async fn count(req: ServerRequest) -> tide::Result<String> {
-    info!("Ring revent recorded");
     let state = req.state();
+    info!("Ring revent recorded");
     let hits = state.as_ref().read().await;
     Ok(serde_json::to_string(&hits.events)?)
 }

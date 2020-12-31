@@ -16,7 +16,7 @@ cortex-m-rt = "0.6.12"
 # nrf52832-hal = "0.12.0"
 defmt = { git = "https://github.com/knurling-rs/defmt", rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
 defmt-rtt = { git = "https://github.com/knurling-rs/defmt", rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
-# panic-probe = { git = "https://github.com/knurling-rs/defmt", features = ["print-defmt"], rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
+panic-probe = { git = "https://github.com/knurling-rs/defmt", features = ["print-defmt"], rev = "dd056e6b7ea807e43f851c75b6fa24bfd7cf9f5a" }
 # dwm1001 = { git = "https://github.com/braun-embedded/rust-dw1000", features = ["rt"] }
 dwm1001 = { git = "https://github.com/braun-embedded/rust-dw1000", features = ["rt", "dev"] }
 lis2dh12 = "0.6.0"

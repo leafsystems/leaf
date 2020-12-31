@@ -9,13 +9,15 @@ use dwm1001::{
         ranging::{self, Message as _},
         RxConfig,
     },
-    nrf52832_hal::{Delay, Timer},
+    nrf52832_hal::{gpio::Level, Delay, Timer},
     prelude::*,
     print, DWM1001,
 };
+use nrf_tests as _;
 
+use embedded_hal::digital::v2::InputPin;
+use embedded_hal::digital::v2::OutputPin;
 // use cortex_m_rt::entry;
-use defmt_rtt as _;
 
 #[entry]
 fn main() -> ! {
@@ -29,6 +31,7 @@ fn main() -> ! {
 
     // Configure timer
     let mut timer = Timer::new(dwm1001.TIMER0);
+    let mut led = dwm1001.pins.GPIO_12.into_push_pull_output(Level::Low);
 
     loop {
         let mut receiving = dw1000
@@ -58,9 +61,10 @@ fn main() -> ! {
         };
 
         if message.frame.payload.starts_with(ranging::Ping::PRELUDE.0) {
-            dwm1001.leds.D10.enable();
+            led.set_high();
             delay.delay_ms(10u32);
-            dwm1001.leds.D10.disable();
+            led.set_low();
+
             continue;
         }
         if message
@@ -68,9 +72,10 @@ fn main() -> ! {
             .payload
             .starts_with(ranging::Request::PRELUDE.0)
         {
-            dwm1001.leds.D11.enable();
+            led.set_high();
             delay.delay_ms(10u32);
-            dwm1001.leds.D11.disable();
+            led.set_low();
+
             continue;
         }
         if message
@@ -78,38 +83,27 @@ fn main() -> ! {
             .payload
             .starts_with(ranging::Response::PRELUDE.0)
         {
-            dwm1001.leds.D12.enable();
+            led.set_high();
             delay.delay_ms(10u32);
-            dwm1001.leds.D12.disable();
+            led.set_low();
+
             continue;
         }
 
-        dwm1001.leds.D9.enable();
+        led.set_high();
         delay.delay_ms(10u32);
-        dwm1001.leds.D9.disable();
+        led.set_low();
 
         defmt::info!("Received frame!");
         // message.frame.payload
         defmt::info!("{:?}!", message.frame.payload);
 
         // let b = b
-        match dwm1001.uart.write(message.frame.payload) {
-            Ok(_) => {}
-            Err(e) => defmt::info!("writing to uart failed"),
-        }
+        // match dwm1001.uart.write(message.frame.payload) {
+        //     Ok(_) => {}
+        //     Err(e) => defmt::info!("writing to uart failed"),
+        // }
         // defmt::info!("{}!", message.);
         // print!("Received frame: {:x?}\n", message.frame);
-    }
-}
-
-#[panic_handler]
-pub fn panic(_info: &core::panic::PanicInfo) -> ! {
-    defmt::error!("panicked");
-    exit()
-}
-
-pub fn exit() -> ! {
-    loop {
-        cortex_m::asm::bkpt();
     }
 }
