@@ -1,21 +1,6 @@
 [workspace]
-members = [
-    "packages/web-viewer",
-    "packages/gateway",
-    "packages/ingestor",
-    "packages/common-interfaces",
-    # "packages/nrf-tests",
-    # "packages/ranging-firmware",
-]
-exclude = ["packages/ranging-firmware", "packages/nrf-tests"]
-# members = [
-#     "packages/web-viewer",
-#     "packages/gateway",
-#     "packages/ingestor",
-#     "packages/common-interfaces",
-# ]
-# members = ["packages/web-viewer", "packages/gateway"]
-# members = ["packages/gateway", "packages/nrf-tests"]
+members = ["packages/gateway", "packages/ingestor", "packages/uart-types"]
+
 
 # [package.metadata.rwmc_project.profile.dev]
 
@@ -27,17 +12,17 @@ exclude = ["packages/ranging-firmware", "packages/nrf-tests"]
 # debug = 1 # default is `false`; using `true` is also OK
 
 # [profile.dev.package.nrf-tests]
-# codegen-units = 1 
-# debug = 2 
+# codegen-units = 1
+# debug = 2
 # debug-assertions = true # <-
-# incremental = false 
+# incremental = false
 # opt-level = 3 # <-
 # overflow-checks = true # <-
 
 # [profile.release.package.nrf-tests]
-# codegen-units = 1 
-# debug = 2 
+# codegen-units = 1
+# debug = 2
 # debug-assertions = false # <-
-# incremental = false 
+# incremental = false
 # opt-level = 3 # <-
 # overflow-checks = false # <-
