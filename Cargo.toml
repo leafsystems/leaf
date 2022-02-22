@@ -1,5 +1,10 @@
 [workspace]
-members = ["packages/gateway", "packages/ingestor", "packages/uart-types"]
+members = [
+    "packages/gateway",
+    "packages/ingestor",
+    "packages/uart-types",
+    "packages/tag",
+]
 
 
 # [package.metadata.rwmc_project.profile.dev]
