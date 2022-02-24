@@ -7,14 +7,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rppal = "0.11.3"
-reqwest = { version = "0.10.10", features = [
+rppal = "0.13.1"
+reqwest = { version = "0.11.9", features = [
     "rustls-tls",
     "json",
 ], default-features = false }
 anyhow = "1.0.35"
-async-std = { version = "1.8.0", features = ["tokio02", "attributes"] }
 log = "0.4"
 fern = { version = "0.6.0", features = ["colored"] }
-async-channel = "1.5.1"
+futures-channel = "0.3.21"
 futures-lite = "1.11.2"

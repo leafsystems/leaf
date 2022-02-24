@@ -27,6 +27,9 @@ accelerometer = "0.12.0"
 mpu6050 = "0.1.5"
 shared-bus = "0.2.2"
 zerocopy = "0.6.1"
+uart-types = { path = "../uart-types" }
+ssmarshal = { version = "1.0.0", default-features = false }
+
 
 [dependencies.nrf52832-hal]
 version = "0.14.0"

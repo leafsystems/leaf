@@ -15,6 +15,8 @@ use defmt_rtt as _;
 use panic_probe as _;
 
 use cortex_m_rt::entry;
+use nb::block;
+
 use dwm1001::{
     block_timeout,
     dw1000::{
@@ -85,12 +87,40 @@ fn main() -> ! {
     loop {
         defmt::info!("Event loop");
 
+        // After receiving for a while, it's time to send out a ping
+        if let Ok(()) = task_timer.wait() {
+            defmt::info!("Inner loop");
+            task_timer.start(5_000_000u32);
+
+            dwm1001.leds.D10.enable();
+            delay.delay_ms(10u32);
+            dwm1001.leds.D10.disable();
+
+            let mut sending = ranging::Ping::new(&mut dw1000)
+                .expect("Failed to initiate ping")
+                .send(dw1000, tag::configure_tx())
+                .expect("Failed to initiate ping transmission");
+
+            defmt::info!("sending made, starting to wait");
+
+            timeout_timer.start(100_000u32);
+            block!({
+                dw_irq.wait_for_interrupts(&mut gpiote, &mut timeout_timer);
+                sending.wait_transmit()
+            })
+            .expect("Failed to send ping");
+
+            dw1000 = sending.finish_sending().expect("Failed to finish sending");
+            defmt::info!("Ping sent");
+        } else {
+            defmt::info!("Timer expired");
+        }
+
         let mut receiving = dw1000
             .receive(RxConfig::default())
             .expect("Failed to receive message");
 
         timeout_timer.start(500_000u32);
-
         let result = block_timeout!(&mut timeout_timer, {
             dw_irq.wait_for_interrupts(&mut gpiote, &mut timeout_timer);
             receiving.wait_receive(&mut buf)
@@ -141,7 +171,7 @@ fn main() -> ! {
 
         timeout_timer.start(100_000u32);
 
-        nb::block!({
+        block!({
             dw_irq.wait_for_interrupts(&mut gpiote, &mut timeout_timer);
             sending.wait_transmit()
         })

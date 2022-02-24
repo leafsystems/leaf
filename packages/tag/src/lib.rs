@@ -14,6 +14,9 @@ use dwm1001::nrf52832_hal::{
     timer::{self, Timer},
 };
 
+pub mod log_msg;
+pub use log_msg::DatalogPacket;
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Msg {
     pub id: u8,

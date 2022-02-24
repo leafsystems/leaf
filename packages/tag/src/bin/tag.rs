@@ -10,10 +10,10 @@
 #![no_main]
 #![no_std]
 
-use lis2dh12::RawAccelerometer;
+use lis2dh12::{Lis2dh12, RawAccelerometer};
 
 use defmt_rtt as _;
-use tag::{configure_rx, configure_tx, Msg};
+use tag::Msg;
 
 use nrf52832_hal::{
     gpio::p0::{self},
@@ -36,6 +36,7 @@ use dwm1001::{
     },
     prelude::*,
 };
+use uart_types::{DataReading, DATA_BUF_SIZE};
 
 static ID: Option<&str> = core::option_env!("BASE_STATION_ID");
 
@@ -45,13 +46,13 @@ fn main() -> ! {
 
     defmt::debug!("Launching basestation");
 
-    let mut dwm = dwm1001::DWM1001::take().unwrap();
+    let mut chip = dwm1001::DWM1001::take().unwrap();
 
-    let mut delay = Delay::new(dwm.SYST);
-    let mut rng = Rng::new(dwm.RNG);
+    let mut delay = Delay::new(chip.SYST);
+    let mut rng = Rng::new(chip.RNG);
 
-    dwm.DW_RST.reset_dw1000(&mut delay);
-    let mut radio = dwm
+    chip.DW_RST.reset_dw1000(&mut delay);
+    let mut radio = chip
         .DW1000
         .init(&mut delay)
         .expect("Failed to initialize DW1000");
@@ -59,6 +60,7 @@ fn main() -> ! {
     radio
         .enable_tx_interrupts()
         .expect("Failed to enable TX interrupts");
+
     radio
         .enable_rx_interrupts()
         .expect("Failed to enable RX interrupts");
@@ -73,73 +75,80 @@ fn main() -> ! {
         .set_antenna_delay(16456, 16300)
         .expect("Failed to set antenna delay");
 
-    // Set network address
-    radio
-        .set_address(
-            mac::PanId(0x0d57),                  // hardcoded network id
-            mac::ShortAddress(rng.random_u16()), // random device address
-        )
-        .expect("Failed to set address");
 
-    let address = lis2dh12::SlaveAddr::Alternative(true);
 
-    let mut lis2dh12 = lis2dh12::Lis2dh12::new(dwm.LIS2DH12, address).expect("lis2dh12 new failed");
+    let bus = shared_bus::BusManagerSimple::new(chip.LIS2DH12);
 
-    defmt::info!(
-        "WHOAMI: {:08b}",
-        lis2dh12
-            .get_device_id()
-            .expect("lis2dh12 get_device_id failed")
-    );
+    let mut accelerometer = {
+        let mut accelerometer =
+            Lis2dh12::new(bus.acquire_i2c(), lis2dh12::SlaveAddr::Alternative(true))
+                .expect("lis2dh12 new failed");
 
-    lis2dh12
-        .set_mode(lis2dh12::Mode::HighResolution)
-        .expect("lis2dh12 set_mode failed");
+        accelerometer
+            .set_mode(lis2dh12::Mode::HighResolution)
+            .expect("lis2dh12 set_mode failed");
 
-    lis2dh12
-        .set_odr(lis2dh12::Odr::Hz1)
-        .expect("lis2dh12 set_odr failed");
+        accelerometer
+            .set_odr(lis2dh12::Odr::Hz400)
+            .expect("lis2dh12 set_odr failed");
 
-    lis2dh12
-        .enable_axis((true, true, true))
-        .expect("lis2dh12 enable_axis failed");
+        accelerometer
+            .enable_axis((true, true, true))
+            .expect("lis2dh12 enable_axis failed");
 
-    lis2dh12
-        .enable_temp(true)
-        .expect("lis2dh2 enable_temp failed");
+        accelerometer
+            .enable_temp(true)
+            .expect("lis2dh2 enable_temp failed");
 
-    // let twim = make_gryo(&dwm);
+        accelerometer
+    };
 
-    // let scl3 = dwm
-    //     .pc0
-    //     .into_open_drain_output(&mut gpioc.moder, &mut gpioc.otyper)
-    //     .into_af4(&mut gpioc.moder, &mut gpioc.afrl);
-
-    // let sda3 = gpioc
-    //     .pc1
-    //     .into_open_drain_output(&mut gpioc.moder, &mut gpioc.otyper)
-    //     .into_af4(&mut gpioc.moder, &mut gpioc.afrl);
-
-    // let i2c = I2c::i2c3(
-    //     device.I2C3,
-    //     (scl3, sda3),
-    //     KiloHertz(100),
-    //     clocks,
-    //     &mut rcc.apb1r1,
-    // );
-
-    let mut timer = Timer::new(dwm.TIMER0);
-
-    let mut buffer1 = [0; 1024];
-    let mut buffer2 = [0; 1024];
-
-    let mut temp = Temp::new(dwm.TEMP);
-
-    let mut uart_buf = [0u8; 24];
+    let mut mpu = {
+        let mut mpu = mpu6050::Mpu6050::new(bus.acquire_i2c());
+        mpu.init(&mut delay).unwrap();
+        mpu
+    };
 
     loop {
-        defmt::info!("waiting for uart comands");
+        defmt::info!("Sending ping");
 
-        dwm.uart.read(&mut uart_buf).unwrap();
+        for _ in 0..3 {
+            chip.leds.D10.enable();
+            delay.delay_ms(5u32);
+            chip.leds.D10.disable();
+        }
+
+        let mut readings = [DataReading::default(); 2];
+
+        for reading in readings.iter_mut() {
+            *reading = {
+                let gyro = mpu.get_gyro().unwrap();
+                let accel = accelerometer.accel_raw().unwrap();
+
+                DataReading {
+                    gyro_x: gyro[0],
+                    gyro_y: gyro[1],
+                    gyro_z: gyro[2],
+
+                    accel_x: accel[0],
+                    accel_y: accel[1],
+                    accel_z: accel[2],
+                }
+            };
+        }
+
+        defmt::info!("Sending data");
+
+        let mut sending = tag::DatalogPacket::new(&mut radio, readings)
+            .expect("Failed to initiate request")
+            .send(radio, tag::configure_tx())
+            .expect("Failed to initiate request transmission");
+
+        defmt::info!("waiting for transmision");
+
+        nb::block!(sending.wait_transmit()).expect("Failed to send data");
+        radio = sending.finish_sending().expect("Failed to finish sending");
+
+        defmt::info!("packet sent for transmision");
     }
 }

@@ -3,8 +3,12 @@ members = [
     "packages/gateway",
     "packages/ingestor",
     "packages/uart-types",
-    "packages/tag",
+    "packages/cloud",
+    "packages/webapp",
+    # "packages/tag",
 ]
+
+exclude = ["packages/tag"]
 
 
 # [package.metadata.rwmc_project.profile.dev]

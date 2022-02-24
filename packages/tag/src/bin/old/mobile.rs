@@ -170,7 +170,7 @@ fn main() -> ! {
         delay.delay_ms(10u32);
         dwm1001.leds.D9.disable();
 
-        // throttle us to 10hz max
-        delay.delay_ms(50u32);
+        // throttle us to 5hz max
+        delay.delay_ms(200u32);
     }
 }
