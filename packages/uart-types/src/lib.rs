@@ -3,20 +3,10 @@
 use serde::{Deserialize, Serialize};
 use zerocopy::{AsBytes, FromBytes};
 
-pub const DATA_BUF_SIZE: usize = 8;
+pub const DATA_BUF_SIZE: usize = 512;
 
 #[repr(packed)]
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    PartialEq,
-    AsBytes,
-    FromBytes,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, AsBytes, FromBytes, Serialize, Deserialize)]
 pub struct DataReading {
     pub gyro_x: f32,
     pub gyro_y: f32,

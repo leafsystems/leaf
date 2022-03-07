@@ -91,24 +91,41 @@ fn main() -> ! {
                 dwm.leds.D12.disable();
                 delay.delay_ms(50u32);
 
-                // let mut out: [u8; 6] = [
-                //     0x70, // P
-                //     0x69, // I
-                //     0x6e, // N
-                //     0x67, // G
-                //     0x0d, // CR
-                //     0x0a, // LF
-                // ];
+                let mut ping: [u8; 6] = [
+                    0x00, // P
+                    0x00, // I
+                    0x00, // N
+                    0x00, // G
+                    0x00, // CR
+                    0x00, // LF
+                          // 0x70, // P
+                          // 0x69, // I
+                          // 0x6e, // N
+                          // 0x67, // G
+                          // 0x0d, // CR
+                          // 0x0a, // LF
+                ];
+
+                defmt::info!("waiting for log ping");
+
+                dwm.uart.read(&mut ping).unwrap();
 
                 // let as_bytes = readings.as_bytes();
 
                 // for reading in readings.iter() {
 
-
-                dwm.uart.write(readings.as_bytes()).unwrap();
+                // dwm.uart.write(readings.as_bytes()).unwrap();
                 // }
 
                 // delay.delay_ms(2000u32);
+
+                defmt::info!("readings ready to send");
+
+                for reading in readings.iter() {
+                    dwm.uart.write(reading.as_bytes()).unwrap();
+                }
+
+                defmt::info!("readings sent!");
 
                 cur_reading = 0;
 

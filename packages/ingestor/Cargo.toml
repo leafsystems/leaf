@@ -7,9 +7,15 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dioxus = { git = "https://github.com/dioxuslabs/dioxus", features = [
+dioxus = { path = "../../../../dioxus", features = [
     "desktop",
-], branch = "jk/coroutine-coroutineoverhaul" }
+    "router",
+    "fermi",
+] }
+
+
+# dioxus = { git = "https://github.com/dioxuslabs/dioxus", features = [
+# ], branch = "jk/local-router" }
 uart-types = { path = "../uart-types" }
 futures = "0.3.21"
 futures-util = "0.3.21"
@@ -21,3 +27,8 @@ tokio-serial = "5.4.1"
 tokio = { version = "1.17.0", features = ["full"] }
 zerocopy = "0.6.1"
 futures-channel = "0.3.21"
+env_logger = "0.9.0"
+uuid = { version = "0.8.2", features = ["v4", "serde"] }
+im-rc = "15.0.0"
+plotly = { git = "https://github.com/jkelleyrtp/plotly.git", branch = "jk/ergo-fixes" }
+include_dir = "0.7.2"
