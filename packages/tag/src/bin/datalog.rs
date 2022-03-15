@@ -92,18 +92,14 @@ fn main() -> ! {
                 delay.delay_ms(50u32);
 
                 let mut ping: [u8; 6] = [
-                    0x00, // P
-                    0x00, // I
-                    0x00, // N
-                    0x00, // G
-                    0x00, // CR
-                    0x00, // LF
-                          // 0x70, // P
-                          // 0x69, // I
-                          // 0x6e, // N
-                          // 0x67, // G
-                          // 0x0d, // CR
-                          // 0x0a, // LF
+                    0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00,
+                    // 0x70, // P
+                    // 0x69, // I
+                    // 0x6e, // N
+                    // 0x67, // G
+                    // 0x0d, // CR
+                    // 0x0a, // LF
                 ];
 
                 defmt::info!("waiting for log ping");
