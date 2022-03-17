@@ -1,11 +1,44 @@
-export function main() {
+function main() {
   let root = window.document.getElementById("main");
+
   if (root != null) {
-    window.interpreter = new Interpreter(root);
-    window.ipc.postMessage(serializeIpcMessage("initialize"));
+    // create a new ipc
+    window.ipc = new IPC(root);
+
+    window.ipc.send(serializeIpcMessage("initialize"));
   }
 }
-export class Interpreter {
+
+class IPC {
+  constructor(root) {
+    // connect to the websocket
+
+    window.interpreter = new Interpreter(root);
+
+    this.ws = new WebSocket("ws://127.0.0.1:3030/chat");
+
+    this.ws.onopen = () => {
+      console.log("Connected to the websocket");
+    };
+
+    this.ws.onerror = (err) => {
+      console.log("Error: ", err);
+    };
+
+    this.ws.onmessage = (event) => {
+      console.log(event);
+      let edits = JSON.parse(event.data);
+      console.log("Handling edits: ", edits);
+      window.interpreter.handleEdits(edits);
+    };
+  }
+
+  send(msg) {
+    this.ws.send(msg);
+  }
+}
+
+class Interpreter {
   constructor(root) {
     this.root = root;
     this.stack = [root];
@@ -207,7 +240,7 @@ export class Interpreter {
                   event.preventDefault();
                   const href = target.getAttribute("href");
                   if (href !== "" && href !== null && href !== undefined) {
-                    window.ipc.postMessage(
+                    window.ipc.send(
                       serializeIpcMessage("browser_open", { href })
                     );
                   }
@@ -263,7 +296,7 @@ export class Interpreter {
             if (realId == null) {
               return;
             }
-            window.ipc.postMessage(
+            window.ipc.send(
               serializeIpcMessage("user_event", {
                 event: edit.event_name,
                 mounted_dom_id: parseInt(realId),
@@ -287,7 +320,7 @@ export class Interpreter {
   }
 }
 
-export function serialize_event(event) {
+function serialize_event(event) {
   switch (event.type) {
     case "copy":
     case "cut":

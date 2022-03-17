@@ -5,46 +5,76 @@ use std::sync::{
     Arc,
 };
 
+use dioxus::prelude::*;
 use futures_util::{pin_mut, SinkExt, StreamExt, TryFutureExt};
 use tokio::sync::{mpsc, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
+use tokio_util::task::LocalPoolHandle;
 use warp::ws::{Message, WebSocket};
 use warp::Filter;
+
+#[tokio::main]
+async fn main() {
+    pretty_env_logger::init();
+
+    let pool = tokio_util::task::LocalPoolHandle::new(16);
+
+    let routes = warp::path::end()
+        .map(move || warp::reply::html(content()))
+        .or(warp::path("chat")
+            .and(warp::ws())
+            .and(warp::any().map(move || pool.clone()))
+            .map(|ws: warp::ws::Ws, pool| {
+                ws.on_upgrade(move |socket| user_connected(socket, pool))
+            }));
+
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+}
+
+fn app(cx: Scope) -> Element {
+    let (dog, set_dog) = use_state(&cx, || None);
+
+    cx.use_hook(|_| {
+        to_owned![set_dog];
+        cx.spawn(async move {
+            #[derive(serde::Deserialize, Debug)]
+            struct DogApi {
+                message: String,
+            }
+
+            loop {
+                let resp = reqwest::get("https://dog.ceo/api/breeds/image/random")
+                    .await
+                    .unwrap()
+                    .json::<DogApi>()
+                    .await
+                    .unwrap();
+
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                set_dog(Some(resp.message));
+            }
+        })
+    });
+
+    cx.render(rsx! {
+        div { "hello world" },
+        dog.as_ref().and_then(|f| cx.render(rsx!{
+            img {
+                src: "{f}",
+                height: "300px",
+            }
+        }))
+    })
+}
 
 mod events;
 
 /// Our global unique user id counter.
 static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
 
-/// Our state of currently connected users.
-///
-/// - Key is their id
-/// - Value is a sender of `warp::ws::Message`
-type Users = Arc<RwLock<HashMap<usize, mpsc::UnboundedSender<Message>>>>;
-
-#[tokio::main]
-async fn main() {
-    pretty_env_logger::init();
-
-    let state = Users::default();
-
-    let chat = warp::path("chat")
-        .and(warp::ws())
-        .and(warp::any().map(move || state.clone()))
-        .map(|ws: warp::ws::Ws, users| ws.on_upgrade(move |socket| user_connected(socket, users)));
-
-    let index = warp::path::end().map(|| warp::reply::html(INDEX_HTML));
-
-    let routes = index.or(chat);
-
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
-}
-
-async fn user_connected(ws: WebSocket, users: Users) {
+async fn user_connected(ws: WebSocket, pool: LocalPoolHandle) {
     // Use a counter to assign a new unique ID for this user.
     let my_id = NEXT_USER_ID.fetch_add(1, Ordering::Relaxed);
-
-    eprintln!("new chat user: {}", my_id);
 
     // Split the socket into a sender and receive of messages.
     let (mut user_ws_tx, mut user_ws_rx) = ws.split();
@@ -55,55 +85,38 @@ async fn user_connected(ws: WebSocket, users: Users) {
     let mut edits_rx = UnboundedReceiverStream::new(edits_rx);
     let mut event_rx = UnboundedReceiverStream::new(event_rx);
 
-    tokio::task::spawn_blocking(move || {
-        tokio::runtime::Runtime::new()
-            .unwrap()
-            .block_on(async move {
-                use dioxus::prelude::*;
+    let vdom_fut = pool.spawn_pinned(move || async move {
+        let mut vdom = VirtualDom::new(app);
 
-                fn app(cx: Scope) -> Element {
-                    let (count, set_count) = use_state(&cx, || 0);
-                    cx.render(rsx! {
-                        div { "hello world: {count}" }
-                        button {
-                            onclick: move |_| set_count(count + 1),
-                            "increment"
-                        }
-                    })
+        let edits = vdom.rebuild();
+
+        let serialized = serde_json::to_string(&edits.edits).unwrap();
+        edits_tx.send(serialized).unwrap();
+
+        loop {
+            use futures_util::future::{select, Either};
+
+            let new_event = {
+                let vdom_fut = vdom.wait_for_work();
+
+                pin_mut!(vdom_fut);
+
+                match select(event_rx.next(), vdom_fut).await {
+                    Either::Left((l, _)) => l,
+                    Either::Right((_, _)) => None,
                 }
+            };
 
-                let mut vdom = VirtualDom::new(app);
-
-                let edits = vdom.rebuild();
-
-                let serialized = serde_json::to_string(&edits.edits).unwrap();
-                edits_tx.send(serialized).unwrap();
-
-                loop {
-                    use futures_util::future::{select, Either};
-
-                    let new_event = {
-                        let vdom_fut = vdom.wait_for_work();
-
-                        pin_mut!(vdom_fut);
-
-                        match select(event_rx.next(), vdom_fut).await {
-                            Either::Left((l, _)) => l,
-                            Either::Right((_, _)) => None,
-                        }
-                    };
-
-                    if let Some(new_event) = new_event {
-                        vdom.handle_message(dioxus::core::SchedulerMsg::Event(new_event));
-                    } else {
-                        let mutations = vdom.work_with_deadline(|| false);
-                        for mutation in mutations {
-                            let edits = serde_json::to_string(&mutation.edits).unwrap();
-                            edits_tx.send(edits).unwrap();
-                        }
-                    }
+            if let Some(new_event) = new_event {
+                vdom.handle_message(dioxus::core::SchedulerMsg::Event(new_event));
+            } else {
+                let mutations = vdom.work_with_deadline(|| false);
+                for mutation in mutations {
+                    let edits = serde_json::to_string(&mutation.edits).unwrap();
+                    edits_tx.send(edits).unwrap();
                 }
-            })
+            }
+        }
     });
 
     loop {
@@ -129,82 +142,26 @@ async fn user_connected(ws: WebSocket, users: Users) {
         }
     }
 
-    // log::info!("");
+    vdom_fut.abort();
 }
 
-async fn user_message(my_id: usize, msg: Message, users: &Users) {
-    // Skip any non-Text messages...
-    let msg = if let Ok(s) = msg.to_str() {
-        s
-    } else {
-        return;
-    };
-
-    let new_msg = format!("<User#{}>: {}", my_id, msg);
-
-    // New message from this user, send it to everyone else (except same uid)...
-    for (&uid, tx) in users.read().await.iter() {
-        if my_id != uid {
-            if let Err(_disconnected) = tx.send(Message::text(new_msg.clone())) {
-                // The tx is disconnected, our `user_disconnected` code
-                // should be happening in another task, nothing more to
-                // do here.
-            }
-        }
-    }
+fn content() -> String {
+    format!(
+        r#"
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dioxus app</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div id="main"></div>
+    <script>
+      {interpreter}
+      main();
+    </script>
+  </body>
+</html>"#,
+        interpreter = include_str!("../src/interpreter.js")
+    )
 }
-
-async fn user_disconnected(my_id: usize, users: &Users) {
-    eprintln!("good bye user: {}", my_id);
-
-    // Stream closed up, so remove from the user list
-    users.write().await.remove(&my_id);
-}
-
-static INDEX_HTML: &str = r#"<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Warp Chat</title>
-    </head>
-    <body>
-        <h1>Warp chat</h1>
-        <div id="chat">
-            <p><em>Connecting...</em></p>
-        </div>
-        <input type="text" id="text" />
-        <button type="button" id="send">Send</button>
-        <script type="text/javascript">
-        const chat = document.getElementById('chat');
-        const text = document.getElementById('text');
-        const uri = 'ws://' + location.host + '/chat';
-        const ws = new WebSocket(uri);
-
-        function message(data) {
-            const line = document.createElement('p');
-            line.innerText = data;
-            chat.appendChild(line);
-        }
-
-        ws.onopen = function() {
-            chat.innerHTML = '<p><em>Connected!</em></p>';
-        };
-
-        ws.onmessage = function(msg) {
-            message(msg.data);
-        };
-
-        ws.onclose = function() {
-            chat.getElementsByTagName('em')[0].innerText = 'Disconnected!';
-        };
-
-        send.onclick = function() {
-            const msg = text.value;
-            ws.send(msg);
-            text.value = '';
-
-            message('<You>: ' + msg);
-        };
-        </script>
-    </body>
-</html>
-"#;
