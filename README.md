@@ -10,7 +10,9 @@ Monolithic ingestion service
 - Endpoint for delivering data
 - A liveview app written in Dioxus.
 
-Deployed to vercel (?)
+Deployed to vercel (????)
+
+
 
 ## User App
 
