@@ -1,30 +1,29 @@
 #![no_std]
 
 use serde::{Deserialize, Serialize};
-use zerocopy::{AsBytes, FromBytes};
-
-pub const DATA_BUF_SIZE: usize = 512;
 
 #[repr(packed)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, AsBytes, FromBytes, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    zerocopy::FromBytes,
+    zerocopy::AsBytes,
+)]
 pub struct DataReading {
-    pub gyro_x: f32,
-    pub gyro_y: f32,
-    pub gyro_z: f32,
-    pub accel_x: i16,
-    pub accel_y: i16,
-    pub accel_z: i16,
+    pub timestamp: u64,
+    pub distance_mm: u64,
+    pub anchor: u16,
+    pub tag: u16,
 }
 
-#[derive(Serialize, Deserialize)]
-pub enum UartRequest {
-    Range { to: u8 },
-    Ping,
-    Health,
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum UartResponse {
-    Range { distance_mm: u32 },
-    Health,
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum GatewayCommand {
+    RegisterAnchor(u32),
+    RegisterTag(u32),
+    DropAnchor(u32),
 }

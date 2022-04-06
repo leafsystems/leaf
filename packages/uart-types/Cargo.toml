@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 serde = { version = "1.0.136", features = ["derive"], default-features = false }
-zerocopy = "0.6.1"
 postcard = "0.7.3"
+zerocopy = "0.6.1"

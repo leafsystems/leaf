@@ -1,49 +1,75 @@
-mod logging;
+#![allow(non_snake_case)]
+use dioxus::prelude::*;
+use warp::ws::Ws;
+use warp::Filter;
 
-use anyhow::{Error, Result};
-use log::{debug, error, info, warn};
-use rppal::uart::{Parity, Uart};
-use std::time::Duration;
-
-#[async_std::main]
-async fn main() -> Result<()> {
-    logging::set_up_logging();
-
-    info!("Starting gateway service");
-
-    // Connect to the primary UART and configure it for 115.2 kbit/s, no
-    // parity bit, 8 data bits and 1 stop bit.
-    let mut uart = Uart::new(115_200, Parity::None, 8, 1)?;
-
-    // Configure read() to block until at least 1 byte is received.
-    uart.set_read_mode(1, Duration::from_secs(0))?;
-    // uart.set_read_mode(1, Duration::default())?;
-
-    let mut buffer = [0u8; 1];
-    let mut message = Vec::new();
-
-    info!("Buffer assembled");
-    loop {
-        // TODO! assemble this into a packet
-        info!("Reading...");
-
-        // Fill the buffer variable with any incoming data.
-        if uart.read(&mut buffer)? > 0 {
-            info!("Received byte: {}", buffer[0]);
-            info!("Byts are {:?}", buffer);
-            message.push(buffer[0]);
-            // let text = String::from_utf8(message.clone())?;
-            // info!("Message is {}", text);
-            reqwest::get("http://192.168.1.24:9001/ring").await?;
-        } else {
-            info!("uhhhh nothing recived");
-        }
-    }
-
-    Ok(())
+use components::*;
+mod components {
+    pub(crate) mod analysis;
+    pub(crate) mod dashboard;
+    // pub(crate) mod datalog;
+    pub(crate) mod developer;
+    pub(crate) mod hardware;
+    // pub(crate) mod historical;
+    pub(crate) mod home;
+    pub(crate) mod nav;
+    pub(crate) mod raw;
+    pub(crate) mod setup;
 }
 
-// rm gateway
-// curl http://192.168.1.24:8000/target/arm-unknown-linux-musleabi/release/gateway --output gateway
-// chmod +x gateway
-// ./gateway
+mod providers {
+    pub mod data;
+    pub mod hardware;
+    pub mod sites;
+}
+
+fn app(cx: Scope) -> Element {
+    providers::hardware::use_hardware_service(&cx);
+
+    cx.render(rsx! {
+        Router {
+            link { href: "https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css", rel: "stylesheet" }
+            script { src: "https://cdn.plot.ly/plotly-1.52.3.min.js" }
+            style { "body {{ height: 100vh; padding: 0; margin: 0; }}" }
+            div { class: "mx-auto lg:ml-80",
+                nav::VerticalNav { }
+                section { class: "py-8",
+                    div { class: "overflow-hidden container mx-auto px-4",
+                        Route { to: "/", dashboard::Dashboard {} }
+                        Route { to: "/hardware", hardware::Hardware {} }
+                        Route { to: "/setup", setup::Setup {} }
+                        Route { to: "/raw", raw::Setup {} }
+                        Route { to: "/analysis", analysis::Setup {} }
+                        Route { to: "/developer", developer::Setup {} }
+                        Route { to: "", "Err 404 - Not Found" }
+                    }
+                }
+            }
+        }
+    })
+}
+
+#[tokio::main]
+async fn main() {
+    std::env::set_var("RUST_LOG", "debug");
+
+    env_logger::init();
+
+    let addr = ([127, 0, 0, 1], 3030);
+
+    let view = dioxus_liveview::new(addr);
+    let body = view.body();
+
+    let routes = warp::path::end()
+        .map(move || warp::reply::html(body.clone()))
+        .or(warp::path("app")
+            .and(warp::ws())
+            .and(warp::any().map(move || view.clone()))
+            .map(|ws: Ws, view: dioxus_liveview::Liveview| {
+                ws.on_upgrade(|socket| async move {
+                    view.upgrade(socket, app).await;
+                })
+            }));
+
+    warp::serve(routes).run(addr).await;
+}

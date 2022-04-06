@@ -1,9 +1,10 @@
 use dioxus::prelude::*;
 
-pub fn Sites(cx: Scope) -> Element {
+#[inline_props]
+pub fn Hardware(cx: Scope) -> Element {
     cx.render(rsx! {
         div {
-            "Sites"
+            "Hardware"
         }
     })
 }

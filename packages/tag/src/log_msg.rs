@@ -3,7 +3,6 @@ use core::mem::size_of;
 use dwm1001::dw1000::ranging::{Message, Prelude, TxMessage};
 use embedded_hal::{blocking::spi, digital::v2::OutputPin};
 use serde::{Deserialize, Serialize};
-use ssmarshal;
 
 use dwm1001::dw1000::configs::{PulseRepetitionFrequency, UwbChannel};
 use dwm1001::dw1000::hl::SendTime;

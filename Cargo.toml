@@ -1,15 +1,12 @@
 [workspace]
 members = [
     "packages/gateway",
-    "packages/ingestor",
     "packages/uart-types",
     "packages/cloud",
-    "packages/webapp",
-    # "packages/tag",
+    "packages/cli",
 ]
 
 exclude = ["packages/tag"]
-
 
 # [package.metadata.rwmc_project.profile.dev]
 

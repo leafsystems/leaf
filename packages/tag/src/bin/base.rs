@@ -36,6 +36,7 @@ fn main() -> ! {
     let mut rng = Rng::new(chip.RNG);
 
     chip.DW_RST.reset_dw1000(&mut delay);
+
     let mut radio = chip
         .DW1000
         .init(&mut delay)
@@ -57,8 +58,6 @@ fn main() -> ! {
     let mut uart_buf = [0u8; 1024];
 
     loop {
-        flash_lights(&mut chip.leds, &mut timer, 5_000, 5_000);
-
         defmt::debug!("waiting for base mobile tag ping");
 
         let mut receiving = radio
@@ -93,24 +92,15 @@ fn main() -> ! {
             };
 
         // Received ping from an anchor. Reply with a ranging
-        let ix = data.payload.data[0];
-        defmt::info!(
-            "Received data. {:?} {:?} {:?}",
-            ix.gyro_x,
-            ix.gyro_y,
-            ix.gyro_z
-        );
-    }
-}
+        for reading in data.payload.data.iter() {
+            chip.uart.write(reading.as_bytes()).unwrap();
 
-fn flash_lights(
-    leds: &mut dwm1001::Leds,
-    timer: &mut Timer<nrf52832_hal::pac::TIMER0>,
-    on: u32,
-    off: u32,
-) {
-    leds.D10.enable();
-    tag::delay_timer(timer, on); // 20ms
-    leds.D10.disable();
-    tag::delay_timer(timer, off); // 230ms
+            defmt::info!(
+                "Received data. \n{:?} \n{:?} \n{:?}",
+                reading.gyro_x,
+                reading.gyro_y,
+                reading.gyro_z
+            );
+        }
+    }
 }

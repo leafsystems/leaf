@@ -1,16 +1,6 @@
 use dioxus::prelude::*;
 
 #[inline_props]
-pub fn Dashboard(cx: Scope) -> Element {
-    cx.render(rsx! {
-        crate::components::datalog::Datalog {}
-        // div {
-        //     "Dashboard"
-        // }
-    })
-}
-
-#[inline_props]
 pub fn Hardware(cx: Scope) -> Element {
     cx.render(rsx! {
         div {

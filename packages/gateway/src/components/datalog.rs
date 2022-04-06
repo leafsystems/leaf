@@ -49,7 +49,9 @@ pub fn GraphView(cx: Scope, uart: UseRef<UartViewState>) -> Element {
             h1 { "Run Data: "}
 
             button {
-                onclick: move |_| uart.read().save_data(),
+                onclick: move |_| {
+                    uart.write().save_data();
+                },
                 "Save Data to disk!"
             }
         }
@@ -69,10 +71,10 @@ pub fn RawView(cx: Scope, uart: UseRef<UartViewState>) -> Element {
             cx.render(rsx!{
                 button {
                     onclick: move |_| {
-                        uart.read().save_data();
+                        let id = uart.write().save_data();
                         set_Data({
                             let mut new = data.clone();
-                            new.runs.insert(uuid::Uuid::new_v4(), load_run(uart.read().msgs.clone()));
+                            new.runs.insert(id, load_run(uart.read().msgs.clone()));
                             new
                         });
                     },
@@ -98,6 +100,7 @@ pub fn RawView(cx: Scope, uart: UseRef<UartViewState>) -> Element {
 
                 th { "distance" }
             },
+
             uart.read().msgs.iter().rev().take(256).map(|msg| match msg {
                 UartUpdate::Ranging {
                     id,

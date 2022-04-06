@@ -1,35 +1,5 @@
 pub use dioxus::prelude::*;
 
-use crate::components;
-
-// #[inline_props]
-// pub fn VerticalNav<'a>(cx: Scope<'a>, children: Element<'a>) -> Element {
-//     cx.render(rsx! {
-//         div {
-//             ul { class: "flex flex-wrap fixed bottom-0 inset-x-0 flex",
-//                 Link { to: "/", components::nav::NavButton { "Home" }}
-//                 Link { to: "/games", components::nav::NavButton { "Games" }}
-//                 Link { to: "/play", components::nav::NavButton { "Play" }}
-//                 Link { to: "/settings", components::nav::NavButton { "Settings" }}
-//             }
-//             children
-//         }
-//     })
-// }
-
-#[inline_props]
-pub fn NavButton<'a>(cx: Scope<'a>, children: Element<'a>) -> Element {
-    cx.render(rsx! {
-        div {
-            class: "w-full block py-5 px-3 text-center text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-900",
-            width: "25vw",
-            height: "12vh",
-            display: "fixed",
-            children
-        }
-    })
-}
-
 #[inline_props]
 pub fn VerticalNav<'a>(cx: Scope<'a>, children: Element<'a>) -> Element {
     cx.render(rsx!(
@@ -38,36 +8,17 @@ pub fn VerticalNav<'a>(cx: Scope<'a>, children: Element<'a>) -> Element {
             div { class: "flex w-full items-center px-6 pb-6 mb-6 lg:border-b border-blue-50",
                 a { class: "text-xl font-semibold",
                     href: "#",
-                    img { class: "h-8",
+                    img { class: "w-16",
                         alt: "",
                         width: "auto",
-                        src: "artemis-assets/logos/artemis-logo-light.svg",
+                        src: "https://avatars.githubusercontent.com/u/42215498?s=200&v=4",
                     }
                 }
             }
             div { class: "px-4 pb-6",
                 GlobalTools {}
-                SiteTools {}
-                div { class: "pt-8",
-                    a { class: "flex items-center pl-3 py-3 pr-2 text-gray-500 hover:bg-indigo-50 rounded",
-                        href: "#",
-                        span { class: "inline-block mr-4",
-                            icons::icon_15 {}
-                        }
-                        span {
-                            "Settings"
-                        }
-                    }
-                    a { class: "flex items-center pl-3 py-3 pr-2 text-gray-500 hover:bg-indigo-50 rounded",
-                        href: "#",
-                        span { class: "inline-block mr-4",
-                            icons::icon_16 {}
-                        }
-                        span {
-                            "Log Out"
-                        }
-                    }
-                }
+                // SiteTools {}
+                // UserTools {}
             }
         }
     ))
@@ -83,16 +34,24 @@ fn GlobalTools(cx: Scope) -> Element {
                 name: "Home"
             }
             NavItem {
-                to: "/site/a",
-                name: "Site A"
+                to: "/analysis",
+                name: "Analysis"
             }
             NavItem {
-                to: "/site/b",
-                name: "Site B"
+                to: "/setup",
+                name: "Setup"
             }
             NavItem {
-                to: "/site/c",
-                name: "Site C"
+                to: "/hardware",
+                name: "Devices"
+            }
+            NavItem {
+                to: "/raw",
+                name: "Logs"
+            }
+            NavItem {
+                to: "/developer",
+                name: "Developer View"
             }
         }
     })
@@ -153,9 +112,38 @@ fn SiteTools(cx: Scope) -> Element {
 }
 
 #[inline_props]
+fn UserTools(cx: Scope) -> Element {
+    cx.render(rsx! {
+        div { class: "pt-8",
+            a { class: "flex items-center pl-3 py-3 pr-2 text-gray-500 hover:bg-indigo-50 rounded",
+                href: "#",
+                span { class: "inline-block mr-4",
+                    icons::icon_15 {}
+                }
+                span {
+                    "Settings"
+                }
+            }
+            a { class: "flex items-center pl-3 py-3 pr-2 text-gray-500 hover:bg-indigo-50 rounded",
+                href: "#",
+                span { class: "inline-block mr-4",
+                    icons::icon_16 {}
+                }
+                span {
+                    "Log Out"
+                }
+            }
+        }
+    })
+}
+
+#[inline_props]
 fn NavItem<'a>(cx: Scope<'a>, name: &'a str, children: Element<'a>, to: &'a str) -> Element {
-    let open = use_state(&cx, || false);
-    let active_class = if use_route(&cx).url().path() == cx.props.to {
+    let route = use_route(&cx);
+
+    let is_current = route.url().path().starts_with(cx.props.to);
+
+    let active_class = if route.url().path() == cx.props.to {
         "bg-indigo-500 text-white"
     } else {
         "text-gray-500"
@@ -174,7 +162,7 @@ fn NavItem<'a>(cx: Scope<'a>, name: &'a str, children: Element<'a>, to: &'a str)
                     span {
                         class: "inline-block ml-auto hover:bg-gray-500",
                         onclick: move |evt| {
-                            open.set(!open.get());
+                            // open.set(!open.get());
                             evt.cancel_bubble();
                         },
                         icons::icon_8 {}
@@ -183,8 +171,22 @@ fn NavItem<'a>(cx: Scope<'a>, name: &'a str, children: Element<'a>, to: &'a str)
             }
             div {
                 class: "px-4",
-                open.then(|| rsx!{ children })
+                is_current.then(|| rsx!{ children })
+                // open.then(|| rsx!{ children })
             }
+        }
+    })
+}
+
+#[inline_props]
+pub fn NavButton<'a>(cx: Scope<'a>, children: Element<'a>) -> Element {
+    cx.render(rsx! {
+        div {
+            class: "w-full block py-5 px-3 text-center text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-900",
+            width: "25vw",
+            height: "12vh",
+            display: "fixed",
+            children
         }
     })
 }

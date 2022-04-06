@@ -13,13 +13,8 @@
 use lis2dh12::{Lis2dh12, RawAccelerometer};
 
 use defmt_rtt as _;
-use tag::Msg;
-
-use nrf52832_hal::{
-    gpio::p0::{self},
-    Twim,
-};
 use panic_probe as _;
+use tag::{configure_rx, configure_tx, Msg};
 
 use dwm1001::{
     block_timeout,
@@ -36,52 +31,49 @@ use dwm1001::{
     },
     prelude::*,
 };
-use uart_types::{DataReading, DATA_BUF_SIZE};
-
-static ID: Option<&str> = core::option_env!("BASE_STATION_ID");
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
-    let _our_id: u8 = ID.unwrap_or("0").parse().unwrap();
-
-    defmt::debug!("Launching basestation");
+    defmt::debug!("Launching tag");
 
     let mut chip = dwm1001::DWM1001::take().unwrap();
-
     let mut delay = Delay::new(chip.SYST);
     let mut rng = Rng::new(chip.RNG);
 
-    chip.DW_RST.reset_dw1000(&mut delay);
-    let mut radio = chip
-        .DW1000
-        .init(&mut delay)
-        .expect("Failed to initialize DW1000");
+    let mut radio = {
+        chip.DW_RST.reset_dw1000(&mut delay);
 
-    radio
-        .enable_tx_interrupts()
-        .expect("Failed to enable TX interrupts");
+        let mut radio = chip
+            .DW1000
+            .init(&mut delay)
+            .expect("Failed to initialize DW1000");
 
-    radio
-        .enable_rx_interrupts()
-        .expect("Failed to enable RX interrupts");
+        radio
+            .enable_tx_interrupts()
+            .expect("Failed to enable TX interrupts");
 
-    // These are the hardcoded calibration values from the dwm1001-examples
-    // repository[1]. Ideally, the calibration values would be determined using
-    // the proper calibration procedure, but hopefully those are good enough for
-    // now.
-    //
-    // [1] https://github.com/Decawave/dwm1001-examples
-    radio
-        .set_antenna_delay(16456, 16300)
-        .expect("Failed to set antenna delay");
+        radio
+            .enable_rx_interrupts()
+            .expect("Failed to enable RX interrupts");
 
+        // Set network address
+        radio
+            .set_address(
+                mac::PanId(0x0d57),                  // hardcoded network id
+                mac::ShortAddress(rng.random_u16()), // random device address
+            )
+            .expect("Failed to set address");
 
+        radio
+            .set_antenna_delay(16456, 16300)
+            .expect("Failed to set antenna delay");
 
-    let bus = shared_bus::BusManagerSimple::new(chip.LIS2DH12);
+        radio
+    };
 
     let mut accelerometer = {
         let mut accelerometer =
-            Lis2dh12::new(bus.acquire_i2c(), lis2dh12::SlaveAddr::Alternative(true))
+            Lis2dh12::new(chip.LIS2DH12, lis2dh12::SlaveAddr::Alternative(true))
                 .expect("lis2dh12 new failed");
 
         accelerometer
@@ -89,7 +81,7 @@ fn main() -> ! {
             .expect("lis2dh12 set_mode failed");
 
         accelerometer
-            .set_odr(lis2dh12::Odr::Hz400)
+            .set_odr(lis2dh12::Odr::Hz10)
             .expect("lis2dh12 set_odr failed");
 
         accelerometer
@@ -97,58 +89,73 @@ fn main() -> ! {
             .expect("lis2dh12 enable_axis failed");
 
         accelerometer
-            .enable_temp(true)
-            .expect("lis2dh2 enable_temp failed");
-
-        accelerometer
     };
 
-    let mut mpu = {
-        let mut mpu = mpu6050::Mpu6050::new(bus.acquire_i2c());
-        mpu.init(&mut delay).unwrap();
-        mpu
-    };
+    let mut timeout_timer = Timer::new(chip.TIMER0);
+    let mut dw_irq = chip.DW_IRQ;
+    let mut gpiote = chip.GPIOTE;
+    let mut buf = [0u8; 1024];
+
+    let mut moving = false;
 
     loop {
-        defmt::info!("Sending ping");
+        let reading = accelerometer.accel_raw().unwrap();
+        let total_movement = 0u64
+            .saturating_add(reading.x.abs() as u64)
+            .saturating_add(reading.y.abs() as u64)
+            .saturating_add(reading.z.abs() as u64);
 
-        for _ in 0..3 {
-            chip.leds.D10.enable();
-            delay.delay_ms(5u32);
-            chip.leds.D10.disable();
+        if total_movement < 20_000 {
+            // tag isn't moving. wait 250ms before retrying
+            delay.delay_ms(250u32);
+            continue;
         }
 
-        let mut readings = [DataReading::default(); 2];
+        for _ in 0..5 {
+            // Send the ping
+            let mut pinging = ranging::Ping::new(&mut radio)
+                .unwrap()
+                .send(radio, configure_tx())
+                .unwrap();
 
-        for reading in readings.iter_mut() {
-            *reading = {
-                let gyro = mpu.get_gyro().unwrap();
-                let accel = accelerometer.accel_raw().unwrap();
+            nb::block!(pinging.wait_transmit()).expect("Failed to send data");
+            radio = pinging.finish_sending().expect("Failed to finish sending");
 
-                DataReading {
-                    gyro_x: gyro[0],
-                    gyro_y: gyro[1],
-                    gyro_z: gyro[2],
+            // Wait for the ranging request
+            let mut receiving = radio
+                .receive(configure_rx())
+                .expect("Failed to receive message");
 
-                    accel_x: accel[0],
-                    accel_y: accel[1],
-                    accel_z: accel[2],
-                }
+            // Set timer for timeout
+            timeout_timer.start(1_000_000u32);
+
+            let result = block_timeout!(&mut timeout_timer, receiving.wait_receive(&mut buf));
+
+            radio = receiving
+                .finish_receiving()
+                .expect("Failed to finish receiving");
+
+            let request = match result
+                .as_ref()
+                .map(ranging::Request::decode::<Spim<SPIM2>, P0_17<Output<PushPull>>>)
+            {
+                Ok(Ok(Some(request))) => request,
+                e => continue,
             };
+
+            // Return with a ranging response
+            let mut sending = ranging::Response::new(&mut radio, &request)
+                .expect("Failed to initiate response")
+                .send(radio, tag::configure_tx())
+                .expect("Failed to initiate response transmission");
+
+            timeout_timer.start(100_000u32);
+
+            nb::block!(sending.wait_transmit()).expect("Failed to send ranging response");
+
+            radio = sending.finish_sending().expect("Failed to finish sending");
+
+            delay.delay_ms(100u32);
         }
-
-        defmt::info!("Sending data");
-
-        let mut sending = tag::DatalogPacket::new(&mut radio, readings)
-            .expect("Failed to initiate request")
-            .send(radio, tag::configure_tx())
-            .expect("Failed to initiate request transmission");
-
-        defmt::info!("waiting for transmision");
-
-        nb::block!(sending.wait_transmit()).expect("Failed to send data");
-        radio = sending.finish_sending().expect("Failed to finish sending");
-
-        defmt::info!("packet sent for transmision");
     }
 }

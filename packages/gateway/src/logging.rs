@@ -36,7 +36,7 @@ pub fn set_up_logging() {
         // field which defaults to the module path but can be overwritten with the `target`
         // parameter:
         // `info!(target="special_target", "This log message is about special_target");`
-        .level_for("gateway", log::LevelFilter::Info)
+        .level_for("ingestor", log::LevelFilter::Info)
         // .level_for("pretty_colored", log::LevelFilter::Trace)
         // output to stdout
         .chain(std::io::stdout())

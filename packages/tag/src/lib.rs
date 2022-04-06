@@ -27,9 +27,9 @@ pub struct Msg {
 
 pub fn configure_rx() -> RxConfig {
     RxConfig {
-        bitrate: BitRate::Kbps6800,
+        bitrate: BitRate::Kbps850,
         channel: dw1000::configs::UwbChannel::Channel1,
-        expected_preamble_length: PreambleLength::Symbols64,
+        expected_preamble_length: PreambleLength::Symbols128,
         sfd_sequence: SfdSequence::IEEE,
         ..Default::default()
     }
@@ -37,9 +37,9 @@ pub fn configure_rx() -> RxConfig {
 
 pub fn configure_tx() -> TxConfig {
     TxConfig {
-        bitrate: BitRate::Kbps6800,
+        bitrate: BitRate::Kbps850,
         channel: dw1000::configs::UwbChannel::Channel1,
-        preamble_length: PreambleLength::Symbols64,
+        preamble_length: PreambleLength::Symbols128,
         sfd_sequence: SfdSequence::IEEE,
         ..Default::default()
     }
