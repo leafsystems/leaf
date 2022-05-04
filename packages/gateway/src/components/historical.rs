@@ -15,7 +15,7 @@ pub fn HistoricalList(cx: Scope) -> Element {
         div {
             h1 { "Historical Data" }
             ul {
-                runs.runs.keys().map(|f| rsx!{
+                runs.runs.keys().map(|f| rsx! {
                     HistoricalCard { key: "{f}", id: *f }
                 })
             }
@@ -29,7 +29,7 @@ pub fn HistoricalCard(cx: Scope, id: uuid::Uuid) -> Element {
         li {
             Link {
                 to: "/games/{id}",
-                "{id}",
+                "{id}"
             }
         }
     })
@@ -50,8 +50,12 @@ pub fn HistoricalItem(cx: Scope) -> Element {
                 to: "/games",
                 "Back"
             }
-            GyroPlot { vals: run }
-            AccelPlot { vals: run }
+            GyroPlot {
+                vals: run,
+            }
+            AccelPlot {
+                vals: run,
+            }
         }
     })
 }

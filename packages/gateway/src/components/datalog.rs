@@ -25,19 +25,16 @@ pub fn Datalog(cx: Scope) -> Element {
         });
     }
 
-    cx.render(rsx!(
+    // match **show_raw {
+    //     false => rsx!( GraphView { uart: uart.clone() } ),
+    // true => rsx!( RawView { uart: uart.clone() } ),
+    // }
+    cx.render(rsx! {
         div {
             h1 { "Data" }
-
-            // match **show_raw {
-            //     false => rsx!( GraphView { uart: uart.clone() } ),
-            // true => rsx!( RawView { uart: uart.clone() } ),
-            // }
-
-
             RawView { uart: uart.clone() },
         }
-    ))
+    })
 }
 
 #[inline_props]
@@ -68,7 +65,7 @@ pub fn RawView(cx: Scope, uart: UseRef<UartViewState>) -> Element {
 
     cx.render(rsx! {
         if show_download {
-            cx.render(rsx!{
+            cx.render(rsx! {
                 button {
                     onclick: move |_| {
                         let id = uart.write().save_data();

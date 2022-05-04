@@ -3,44 +3,18 @@
 
 use lis2dh12::{Lis2dh12, RawAccelerometer};
 
+use defmt_rtt as _;
 use dwm1001::{
     nrf52832_hal::{rng::Rng, Delay},
     prelude::*,
 };
 use nrf52832_hal::{
     gpio::p0::{self},
-    Timer, Twim,
+    pac, twim, Timer, Twim,
 };
-
-// use rubble::{
-//     config::Config,
-//     l2cap::{BleChannelMap, L2CAPState},
-//     link::{
-//         ad_structure::AdStructure,
-//         queue::{PacketQueue, SimpleQueue},
-//         LinkLayer, Responder, MIN_PDU_BUF,
-//     },
-//     security::NoSecurity,
-//     time::{Duration, Timer as RubbleTimer},
-// };
-// use rubble_nrf5x::{
-//     radio::{BleRadio, PacketBuffer},
-//     timer::BleTimer,
-//     utils::get_device_address,
-// };
-
-use defmt_rtt as _;
 use panic_probe as _;
 
-use nrf52832_hal::pac;
-use nrf52832_hal::twim;
-use zerocopy::AsBytes;
-
-const DATA_BUF_SIZE: usize = 256;
-// const DATA_BUF_SIZE: usize = 512;
-
-// static mut ble_tx_buf: PacketBuffer = [0; 39];
-// static mut ble_rx_buf: PacketBuffer = [0; 39];
+use uart_types::DataReading;
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
@@ -62,7 +36,7 @@ fn main() -> ! {
             .expect("lis2dh12 set_mode failed");
 
         accelerometer
-            .set_odr(lis2dh12::Odr::Hz1)
+            .set_odr(lis2dh12::Odr::Hz400)
             .expect("lis2dh12 set_odr failed");
 
         accelerometer
@@ -106,32 +80,54 @@ fn main() -> ! {
 
             DATA_BUF_SIZE => {
                 // poll the uart chanel until we get a packet
-                loop {
-                    dwm.leds.D10.enable();
-                    dwm.leds.D11.enable();
-                    dwm.leds.D12.enable();
-                    delay.delay_ms(50u32);
+                dwm.leds.D10.enable();
+                dwm.leds.D11.enable();
+                dwm.leds.D12.enable();
+                delay.delay_ms(50u32);
 
-                    dwm.leds.D10.disable();
-                    dwm.leds.D11.disable();
-                    dwm.leds.D12.disable();
-                    delay.delay_ms(50u32);
+                dwm.leds.D10.disable();
+                dwm.leds.D11.disable();
+                dwm.leds.D12.disable();
+                delay.delay_ms(50u32);
 
-                    let mut out: [u8; 6] = [
-                        0x70, // P
-                        0x69, // I
-                        0x6e, // N
-                        0x67, // G
-                        0x0d, // CR
-                        0x0a, // LF
-                    ];
+                let mut ping: [u8; 6] = [
+                    0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00,
+                    // 0x70, // P
+                    // 0x69, // I
+                    // 0x6e, // N
+                    // 0x67, // G
+                    // 0x0d, // CR
+                    // 0x0a, // LF
+                ];
 
-                    // wait until we get a ping
-                    if dwm.uart.read_timeout(&mut out, &mut timer, 100).is_ok() {
-                        // write our buf to the wire
-                        dwm.uart.write(readings.as_bytes()).unwrap();
-                    }
+                defmt::info!("waiting for log ping");
+
+                dwm.uart.read(&mut ping).unwrap();
+
+                // let as_bytes = readings.as_bytes();
+
+                // for reading in readings.iter() {
+
+                // dwm.uart.write(readings.as_bytes()).unwrap();
+                // }
+
+                // delay.delay_ms(2000u32);
+
+                defmt::info!("readings ready to send");
+
+                for reading in readings.iter() {
+                    dwm.uart.write(reading.as_bytes()).unwrap();
                 }
+
+                defmt::info!("readings sent!");
+
+                cur_reading = 0;
+
+                // // wait until we get a ping
+                // if dwm.uart.read_timeout(&mut out, &mut timer, 100).is_ok() {
+                //     // write our buf to the wire
+                // }
             }
 
             _ => {
@@ -139,18 +135,18 @@ fn main() -> ! {
                     let gyro = mpu.get_gyro().unwrap();
                     let accel = accelerometer.accel_raw().unwrap();
 
-                    DataReading {
-                        gyro_x: gyro[0],
-                        gyro_y: gyro[1],
-                        gyro_z: gyro[2],
+                    // DataReading {
+                    //     gyro_x: gyro[0],
+                    //     gyro_y: gyro[1],
+                    //     gyro_z: gyro[2],
 
-                        accel_x: accel[0],
-                        accel_y: accel[1],
-                        accel_z: accel[2],
-                    }
+                    //     accel_x: accel[0],
+                    //     accel_y: accel[1],
+                    //     accel_z: accel[2],
+                    // }
                 };
 
-                readings[cur_reading] = reading;
+                // readings[cur_reading] = reading;
 
                 delay.delay_ms(15u32);
 
@@ -158,17 +154,6 @@ fn main() -> ! {
             }
         }
     }
-}
-
-#[repr(packed)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, zerocopy::AsBytes)]
-struct DataReading {
-    gyro_x: f32,
-    gyro_y: f32,
-    gyro_z: f32,
-    accel_x: i16,
-    accel_y: i16,
-    accel_z: i16,
 }
 
 /// Create a new instance of the TWIM bus used for the accelerometer
@@ -186,19 +171,3 @@ pub fn new_acc_twim<SCL, SDA>(
         twim::Frequency::K100,
     )
 }
-
-// let mut tx_queue = SimpleQueue::new();
-// let mut rx_queue = SimpleQueue::new();
-
-// let mut ble = {
-//     let (tx, tx_cons) = tx_queue.split();
-//     let (rx_prod, rx) = rx_queue.split();
-
-//     // let mut radio =
-//     //     unsafe { BleRadio::new(dwm.RADIO, &dwm.FICR, &mut ble_tx_buf, &mut ble_rx_buf) };
-
-//     // // Create the actual BLE stack objects
-//     // let mut ble_ll = LinkLayer::<AppConfig>::new(device_address, ble_timer);
-
-//     // radio
-// };

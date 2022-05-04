@@ -1,10 +1,8 @@
 use dioxus::prelude::*;
 
 #[inline_props]
-pub fn Setup(cx: Scope) -> Element {
+pub fn Analysis(cx: Scope) -> Element {
     cx.render(rsx! {
-        div {
-            "Setup"
-        }
+        div { "Analysis" }
     })
 }

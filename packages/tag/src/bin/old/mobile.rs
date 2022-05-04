@@ -10,7 +10,7 @@
 #![no_main]
 #![no_std]
 
-use tag as _;
+use tag::{self as _, UwbPerformance};
 use tag::{configure_rx, configure_tx};
 
 use dwm1001::{
@@ -93,7 +93,7 @@ fn main() -> ! {
         */
         let mut sending = ranging::Ping::new(&mut dw1000)
             .expect("Failed to initiate ping")
-            .send(dw1000, configure_tx())
+            .send(dw1000, configure_tx(UwbPerformance::Medium))
             .expect("Failed to initiate ping transmission");
 
         nb::block!(sending.wait_transmit()).expect("Failed to send data");
@@ -105,7 +105,7 @@ fn main() -> ! {
         Wait for the anchor to respond with a ranging request.
         */
         let mut receiving = dw1000
-            .receive(configure_rx())
+            .receive(configure_rx(UwbPerformance::Medium))
             .expect("Failed to receive message");
 
         // Set timer for timeout
@@ -158,7 +158,7 @@ fn main() -> ! {
         // Send ranging response
         let mut sending = ranging::Response::new(&mut dw1000, &request)
             .expect("Failed to initiate response")
-            .send(dw1000, configure_tx())
+            .send(dw1000, configure_tx(UwbPerformance::Medium))
             .expect("Failed to initiate response transmission");
 
         nb::block!(sending.wait_transmit()).expect("Failed to send data");

@@ -1,156 +1,115 @@
-//! Range measurement anchor node
+//! Range measurement basestation
 //!
-//! This is an anchor node used for range measurement. Anchors have a known
-//! location, and provide the support infrastructure requires by tag nodes to
-//! determine their own distance from the available anchors.
+//! This is a tag acting as a base station, collecting distances to mobile tags.
 //!
-//! Currently, distance measurements have a highly inaccurate result. One reason
-//! that could account for this is the lack of antenna delay calibration, but
-//! it's possible that there are various hidden bugs that contribute to this.
+//! The anchor/tag example does the distance calculation *at the tag* which is less useful for applications where
+//! the tags are very "dumb".
+//!
+//! Instead, the basestation intiates the ranging request and records the distance over defmt.
 
 #![no_main]
 #![no_std]
 
 use defmt_rtt as _;
+use nrf52832_hal::{
+    gpio::{p0::P0_17, Output, PushPull},
+    pac::SPIM2,
+    Spim,
+};
 use panic_probe as _;
 
-use cortex_m_rt::entry;
 use dwm1001::{
     block_timeout,
-    dw1000::{
-        mac,
-        ranging::{self, Message as _RangingMessage},
-        RxConfig,
-    },
-    nrf52832_hal::{
-        gpio::{p0::P0_17, Output, PushPull},
-        pac::SPIM2,
-        prelude::*,
-        rng::Rng,
-        Delay, Spim, Timer,
-    },
+    dw1000::{mac, ranging},
+    nrf52832_hal::{rng::Rng, Delay, Timer},
     prelude::*,
-    DWM1001,
 };
-use tag::configure_rx;
+use uart_types::DataReading;
 
-#[entry]
+type Spi1 = Spim<SPIM2>;
+type Spi2 = P0_17<Output<PushPull>>;
+
+#[cortex_m_rt::entry]
 fn main() -> ! {
-    defmt::info!("Starting anchor code!");
+    defmt::debug!("Launching anchor");
 
-    let mut chip = DWM1001::take().unwrap();
-
+    let mut chip = dwm1001::DWM1001::take().unwrap();
     let mut delay = Delay::new(chip.SYST);
     let mut rng = Rng::new(chip.RNG);
-
-    chip.DW_RST.reset_dw1000(&mut delay);
-    let mut radio = chip
-        .DW1000
-        .init(&mut delay)
-        .expect("Failed to initialize radio");
-
-    radio
-        .enable_tx_interrupts()
-        .expect("Failed to enable TX interrupts");
-
-    radio
-        .enable_rx_interrupts()
-        .expect("Failed to enable RX interrupts");
-
-    let mut dw_irq = chip.DW_IRQ;
-    let mut gpiote = chip.GPIOTE;
-
-    // These are the hardcoded calibration values from the chip-examples
-    // repository[1]. Ideally, the calibration values would be determined using
-    // the proper calibration procedure, but hopefully those are good enough for
-    // now.
-    //
-    // [1] https://github.com/Decawave/chip-examples
-    radio
-        .set_antenna_delay(16456, 16300)
-        .expect("Failed to set antenna delay");
-
-    // Set network address
-    radio
-        .set_address(
-            mac::PanId(0x0d57),                  // hardcoded network id
-            mac::ShortAddress(rng.random_u16()), // random device address
-        )
-        .expect("Failed to set address");
-
     let mut timer = Timer::new(chip.TIMER0);
+    let our_addr = rng.random_u16();
 
-    let mut buf = [0; 128];
+    let mut radio = disc::build_radio(
+        &mut chip.DW_RST,
+        chip.DW1000,
+        &mut delay,
+        our_addr,
+        disc::UwbPerformance::Medium,
+    );
+
+    let mut radio_buf = [0u8; 1024];
+    let mut uart_buf = [0u8; core::mem::size_of::<DataReading>()];
 
     loop {
-        let mut receiving = radio
-            .receive(tag::configure_rx())
-            .expect("Failed to receive message");
+        // // requires multiple packets
 
-        // wait for a message
-        defmt::info!("Waiting for receiver interrupt");
+        let mut receiving = radio.receive().expect("Failed to receive message");
 
-        // task_timer.start(500_000_u32);
-        // dw_irq.wait_for_interrupts(&mut gpiote, &mut task_timer);
+        let msg = nb::block!(receiving.wait(&mut radio_buf));
 
-        // finish receiver
-        let result = nb::block!(receiving.wait_receive(&mut buf));
+        match msg.map(|msg| msg.decode::<ranging::Ping, Spi1, Spi2>()) {
+            Ok(Ok(Some(ping))) => {
+                let mut sending = ranging::Request::new(&mut radio, &ping)
+                    .unwrap()
+                    .send(&mut radio)
+                    .unwrap();
 
-        radio = receiving
-            .finish_receiving()
-            .expect("Failed to finish receiving");
+                nb::block!(sending.wait_transmit()).unwrap();
 
-        let message = match result {
-            Ok(message) => message,
-            _ => {
-                defmt::info!("No message received");
-                continue;
+                let mut receiving = radio.receive().expect("Failed to receive message");
+
+                // Set timer for timeout
+                timer.start(5_000_000u32);
+
+                let msg = block_timeout!(&mut timer, receiving.wait(&mut radio_buf));
+
+                if let Ok(Ok(Some(response))) =
+                    msg.map(|m| m.decode::<ranging::Response, Spi1, Spi2>())
+                {
+                    //
+                    // If this is not a PAN ID and short address, it doesn't
+                    // come from a compatible node. Ignore it.
+                    let (pan_id, addr) = match response.source {
+                        Some(mac::Address::Short(pan_id, addr)) => (pan_id, addr),
+                        _ => continue,
+                    };
+
+                    // Ranging response received. Compute distance.
+                    if let Ok(distance_mm) = ranging::compute_distance_mm(&response) {
+                        chip.leds.D9.enable();
+                        delay.delay_ms(10u32);
+                        chip.leds.D9.disable();
+
+                        defmt::debug!("{:04x}:{:04x} - {} mm", pan_id.0, addr.0, distance_mm,);
+
+                        let msg = DataReading {
+                            anchor: our_addr,
+                            distance_mm,
+                            timestamp: response.rx_time.value(),
+                            tag: addr.0,
+                        };
+
+                        if chip
+                            .uart
+                            .write(postcard::to_slice(&msg, &mut uart_buf).unwrap())
+                            .is_err()
+                        {
+                            defmt::error!("Failed to write to uart");
+                        };
+                    }
+                }
             }
-        };
-
-        chip.leds.D11.enable();
-        delay.delay_ms(10u32);
-        chip.leds.D11.disable();
-
-        let request = ranging::Request::decode::<Spim<SPIM2>, P0_17<Output<PushPull>>>(&message);
-
-        let request = match request {
-            Ok(Some(request)) => {
-                defmt::info!("Request has been made");
-                request
-            }
-            Ok(None) | Err(_) => {
-                defmt::info!("Ignoring message that is not a request\n");
-                continue;
-            }
-        };
-
-        chip.leds.D12.enable();
-        delay.delay_ms(10u32);
-        chip.leds.D12.disable();
-
-        // Wait for a moment, to give the tag a chance to start listening for
-        // the reply.
-        delay.delay_ms(10u32);
-
-        // Send ranging response
-        let mut sending = ranging::Response::new(&mut radio, &request)
-            .expect("Failed to initiate response")
-            .send(radio, tag::configure_tx())
-            .expect("Failed to initiate response transmission");
-
-        timer.start(100_000u32);
-
-        nb::block!({
-            dw_irq.wait_for_interrupts(&mut gpiote, &mut timer);
-            sending.wait_transmit()
-        })
-        .expect("Failed to send ranging response");
-
-        radio = sending.finish_sending().expect("Failed to finish sending");
-
-        chip.leds.D9.enable();
-        delay.delay_ms(10u32);
-        chip.leds.D9.disable();
+            _ => continue,
+        }
     }
 }

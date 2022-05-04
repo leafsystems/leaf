@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 #[inline_props]
-pub fn Developer(cx: Scope) -> Element {
+pub fn Admin(cx: Scope) -> Element {
     cx.render(rsx! {
-        div { "Developer" }
+        div { "Admin" }
     })
 }

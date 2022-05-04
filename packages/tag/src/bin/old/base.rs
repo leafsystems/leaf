@@ -25,7 +25,6 @@ use dwm1001::{
     DWM1001,
 };
 use uart_types::DataReading;
-use zerocopy::AsBytes;
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
@@ -61,7 +60,7 @@ fn main() -> ! {
         defmt::debug!("waiting for base mobile tag ping");
 
         let mut receiving = radio
-            .receive(configure_rx())
+            .receive(configure_rx(UwbPerformance::Medium))
             .expect("Failed to receive message");
 
         let message = nb::block!(receiving.wait_receive(&mut uart_buf));

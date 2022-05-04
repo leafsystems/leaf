@@ -25,7 +25,6 @@ use dwm1001::{
     DWM1001,
 };
 use uart_types::DataReading;
-use zerocopy::AsBytes;
 
 use rubble::{
     att::{AttUuid, Attribute, AttributeAccessPermissions, AttributeProvider, Handle, HandleRange},

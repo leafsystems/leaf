@@ -15,8 +15,8 @@ use serde::{Deserialize, Serialize};
     zerocopy::AsBytes,
 )]
 pub struct DataReading {
-    pub timestamp: u64,
     pub distance_mm: u64,
+    pub timestamp: u64,
     pub anchor: u16,
     pub tag: u16,
 }

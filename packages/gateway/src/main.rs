@@ -1,47 +1,78 @@
 #![allow(non_snake_case)]
+use components::*;
 use dioxus::prelude::*;
 use warp::ws::Ws;
 use warp::Filter;
 
-use components::*;
-mod components {
+pub mod components {
+    pub(crate) mod admin;
+    pub(crate) mod alerts;
     pub(crate) mod analysis;
     pub(crate) mod dashboard;
-    // pub(crate) mod datalog;
     pub(crate) mod developer;
     pub(crate) mod hardware;
-    // pub(crate) mod historical;
-    pub(crate) mod home;
+    pub(crate) mod live;
     pub(crate) mod nav;
     pub(crate) mod raw;
     pub(crate) mod setup;
+    pub(crate) mod tables;
 }
 
 mod providers {
     pub mod data;
     pub mod hardware;
+    pub mod localization;
     pub mod sites;
 }
+
+mod icons;
 
 fn app(cx: Scope) -> Element {
     providers::hardware::use_hardware_service(&cx);
 
+    // div { class: "mx-auto lg:ml-60",
+    // nav::VerticalNav {}
+    // section { class: "overflow-hidden container mr-auto ml-2",
     cx.render(rsx! {
         Router {
-            link { href: "https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css", rel: "stylesheet" }
-            script { src: "https://cdn.plot.ly/plotly-1.52.3.min.js" }
-            style { "body {{ height: 100vh; padding: 0; margin: 0; }}" }
-            div { class: "mx-auto lg:ml-80",
-                nav::VerticalNav { }
-                section { class: "py-8",
-                    div { class: "overflow-hidden container mx-auto px-4",
-                        Route { to: "/", dashboard::Dashboard {} }
-                        Route { to: "/hardware", hardware::Hardware {} }
-                        Route { to: "/setup", setup::Setup {} }
-                        Route { to: "/raw", raw::Setup {} }
-                        Route { to: "/analysis", analysis::Setup {} }
-                        Route { to: "/developer", developer::Setup {} }
-                        Route { to: "", "Err 404 - Not Found" }
+            div { class: "mx-auto",
+                nav::HorizontalNav {}
+                section { class: "overflow-hidden container mx-auto",
+                    Route {
+                        to: "/",
+                        dashboard::Dashboard {}
+                    }
+                    Route {
+                        to: "/analysis",
+                        analysis::Analysis {}
+                    }
+                    Route {
+                        to: "/live",
+                        live::Live {}
+                    }
+                    Route {
+                        to: "/alerts",
+                        alerts::Alerts {}
+                    }
+                    Route {
+                        to: "/hardware",
+                        hardware::Hardware {}
+                    }
+                    Route {
+                        to: "/setup",
+                        setup::Setup {}
+                    }
+                    Route {
+                        to: "/logs",
+                        raw::Logs {}
+                    }
+                    Route {
+                        to: "/developer",
+                        developer::Developer {}
+                    }
+                    Route {
+                        to: "",
+                        "Err 404 - Not Found"
                     }
                 }
             }
@@ -58,7 +89,37 @@ async fn main() {
     let addr = ([127, 0, 0, 1], 3030);
 
     let view = dioxus_liveview::new(addr);
-    let body = view.body();
+    let body = view.body(
+        r####"
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.plot.ly/plotly-1.52.3.min.js"> </script>
+        <style> body { height: 100vh; padding: 0; margin: 0; } </style>
+        <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                    clifford: '#da373d',
+                    }
+                }
+            },
+            variants: {
+                display:['group-hover']
+            }
+        }
+        </script>
+
+        <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+        </script>
+
+        "####,
+    );
 
     let routes = warp::path::end()
         .map(move || warp::reply::html(body.clone()))

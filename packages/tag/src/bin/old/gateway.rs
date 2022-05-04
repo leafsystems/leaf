@@ -1,13 +1,15 @@
 //! This a very special type of anchor that acts as a local gateway. It manages
-//! local anchors and rolls their data up to the cloud over a uart connection during downtime.
+//! local anchors and rolls their data up to the cloud over a uart connection
+//! during downtime.
 //!
 //! The accompanying anchors are much more "dumb" - they simply listen for the
 //! echos of the ranging dances between the gateway and the tags. This data is
 //! reported back later and used to perform full localization
 //!
-//! This lets us scale to a large number of moving tags and keep the anchor infrastructure a bit more minimal.
-//! We're mostly concerned with the tags being as "dumb" as possible - moving from
-//! zone to zone without an idea of the infrastructure that they're contained within.
+//! This lets us scale to a large number of moving tags and keep the anchor
+//! infrastructure a bit more minimal. We're mostly concerned with the tags
+//! being as "dumb" as possible - moving from zone to zone without an idea of
+//! the infrastructure that they're contained within.
 
 #![no_main]
 #![no_std]
@@ -16,7 +18,7 @@ use defmt_rtt as _;
 use panic_probe as _;
 
 use lis2dh12::{Lis2dh12, RawAccelerometer};
-use tag::{configure_rx, Msg};
+use tag::{configure_rx, Msg, UwbPerformance};
 
 use dwm1001::{
     block_timeout,
@@ -44,41 +46,8 @@ fn main() -> ! {
     let mut delay = Delay::new(chip.SYST);
     let mut rng = Rng::new(chip.RNG);
     let our_addr = rng.random_u16();
-
-    let mut radio = {
-        chip.DW_RST.reset_dw1000(&mut delay);
-
-        let mut radio = chip
-            .DW1000
-            .init(&mut delay)
-            .expect("Failed to initialize DW1000");
-
-        radio
-            .enable_tx_interrupts()
-            .expect("Failed to enable TX interrupts");
-
-        radio
-            .enable_rx_interrupts()
-            .expect("Failed to enable RX interrupts");
-
-        radio
-            .set_antenna_delay(16456, 16300)
-            .expect("Failed to set antenna delay");
-
-        // Set network address
-        radio
-            .set_address(
-                mac::PanId(0x0d57),          // hardcoded network id
-                mac::ShortAddress(our_addr), // random device address
-            )
-            .expect("Failed to set address");
-
-        radio
-    };
-
+    let mut radio = tag::build_radio(&mut chip.DW_RST, chip.DW1000, &mut delay, our_addr);
     let mut timeout_timer = Timer::new(chip.TIMER0);
-    let mut dw_irq = chip.DW_IRQ;
-    let mut gpiote = chip.GPIOTE;
     let mut buf = [0u8; 1024];
     let mut uart_buf = [0u8; core::mem::size_of::<DataReading>()];
 
@@ -88,7 +57,7 @@ fn main() -> ! {
 
         // Wait for the ranging request
         let mut receiving = radio
-            .receive(configure_rx())
+            .receive(configure_rx(UwbPerformance::Medium))
             .expect("Failed to receive message");
 
         let result = block_timeout!(&mut timeout_timer, receiving.wait_receive(&mut buf));
@@ -108,7 +77,7 @@ fn main() -> ! {
         // Return with a ranging request
         let mut sending = ranging::Request::new(&mut radio, &ping)
             .expect("Failed to initiate response")
-            .send(radio, tag::configure_tx())
+            .send(radio, tag::configure_tx(UwbPerformance::Medium))
             .expect("Failed to initiate response transmission");
 
         timeout_timer.start(100_000u32);
@@ -119,7 +88,7 @@ fn main() -> ! {
 
         // Wait for the ranging response
         let mut receiving = radio
-            .receive(configure_rx())
+            .receive(configure_rx(UwbPerformance::Medium))
             .expect("Failed to receive message");
 
         let result = block_timeout!(&mut timeout_timer, receiving.wait_receive(&mut buf));
@@ -151,7 +120,9 @@ fn main() -> ! {
         };
 
         // Ranging response received. Compute distance.
-        if let Ok(distance_mm) = ranging::compute_distance_mm(&response, configure_rx()) {
+        if let Ok(distance_mm) =
+            ranging::compute_distance_mm(&response, configure_rx(UwbPerformance::Medium))
+        {
             chip.leds.D9.enable();
             delay.delay_ms(10u32);
             chip.leds.D9.disable();

@@ -1,12 +1,11 @@
-use std::{num, time::Duration};
+use std::{collections::HashMap, num, time::Duration};
 
 use dioxus::{
     core::to_owned,
-    fermi::{use_atom_root, Readable},
+    fermi::{use_atom_root, use_atom_state, Readable},
     prelude::*,
 };
 use futures::StreamExt;
-use serde::__private::de;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio_serial::SerialPortBuilderExt;
 use uart_types::{DataReading, GatewayCommand};
@@ -17,34 +16,54 @@ pub enum Command {
     AddAnchor,
 }
 
-pub static CONNECTED_GATEWAY: Atom<Option<GatewayInfo>> = |_| None;
-pub static READINGS: AtomRef<Vec<DataReading>> = |_| vec![];
+pub static CONNECTED_GATEWAY_1: Atom<Option<GatewayInfo>> = |_| None;
+pub static CONNECTED_GATEWAY_2: Atom<Option<GatewayInfo>> = |_| None;
+
+type AnchorId = u16;
+type TagId = u16;
+
+pub static RAW_READINGS: AtomRef<HashMap<AnchorId, HashMap<TagId, Vec<DataReading>>>> =
+    |_| HashMap::default();
+
+pub static TAG_READINGS: AtomRef<HashMap<u16, Vec<DataReading>>> = |_| HashMap::default();
 
 pub struct GatewayInfo {
-    pub name: String,
+    pub port_name: String,
 }
 
 pub fn use_hardware_service(cx: &ScopeState) {
+    use_poll_gateway(cx, CONNECTED_GATEWAY_1, "000760162072");
+    use_poll_gateway(cx, CONNECTED_GATEWAY_2, "000760162068");
+}
+
+fn use_poll_gateway(cx: &ScopeState, gateway: Atom<Option<GatewayInfo>>, port_id: &'static str) {
     let root = use_atom_root(cx).clone();
+
     let (readings, readings_id) = cx.use_hook(|_| {
-        let val = root.register(READINGS, cx.scope_id());
-        (val, READINGS.unique_id())
+        let val = root.register(RAW_READINGS, cx.scope_id());
+        (val, RAW_READINGS.unique_id())
     });
 
-    use_coroutine(cx, |mut rx: UnboundedReceiver<Command>| {
-        to_owned![readings, readings_id];
+    let (tag_readings, tag_readings_id) = cx.use_hook(|_| {
+        let val = root.register(TAG_READINGS, cx.scope_id());
+        (val, TAG_READINGS.unique_id())
+    });
+
+    use_coroutine(cx, |_: UnboundedReceiver<()>| {
+        to_owned![readings, readings_id, tag_readings, tag_readings_id, root];
         async move {
-            'main: loop {
+            loop {
                 let info = tokio_serial::available_ports()
                     .unwrap()
                     .into_iter()
-                    .find(|f| f.port_name.contains("usbmodem00076"));
+                    .find(|f| f.port_name.contains(port_id));
 
                 let info = match info {
                     Some(info) => info,
                     None => {
                         tokio::time::sleep(Duration::from_secs(1)).await;
-                        root.set(CONNECTED_GATEWAY.unique_id(), None as Option<GatewayInfo>);
+                        log::debug!("Waiting for gateway {}", port_id);
+                        root.set(gateway.unique_id(), None as Option<GatewayInfo>);
                         continue;
                     }
                 };
@@ -55,41 +74,37 @@ pub fn use_hardware_service(cx: &ScopeState) {
                     .open_native_async()
                     .unwrap();
 
+                log::debug!("Connected to gateway {}", info.port_name);
+
                 root.set(
-                    CONNECTED_GATEWAY.unique_id(),
+                    gateway.unique_id(),
                     Some(GatewayInfo {
-                        name: info.port_name,
+                        port_name: info.port_name,
                     }),
                 );
 
+                root.force_update(gateway.unique_id());
+
                 let mut reading = DataReading::default();
 
-                loop {
-                    // while let Some(msg) = rx.next().await {
-                    //     match msg {
-                    //         Command::AddTag => {
-                    //             postcard::to_slice(&GatewayCommand::RegisterTag(10), &mut cmd_buf)
-                    //                 .unwrap();
-                    //             port.write_all(&cmd_buf).await.unwrap();
-                    //         }
+                while port.read_exact(reading.as_bytes_mut()).await.is_ok() {
+                    log::debug!("Reading: {:?}", reading);
 
-                    //         Command::AddAnchor => {
-                    //             postcard::to_slice(&GatewayCommand::RegisterAnchor(10), &mut cmd_buf)
-                    //                 .unwrap();
-                    //             port.write_all(&cmd_buf).await.unwrap();
-                    //         }
-                    //     }
-                    // }
+                    readings
+                        .borrow_mut()
+                        .entry(reading.anchor)
+                        .or_default()
+                        .entry(reading.tag)
+                        .or_default()
+                        .push(reading);
+                    root.force_update(readings_id);
 
-                    match port.read_exact(reading.as_bytes_mut()).await {
-                        Err(_) => continue,
-                        Ok(_) => {
-                            log::debug!("fetched reading {:?}", reading);
-
-                            readings.borrow_mut().push(reading);
-                            root.force_update(readings_id);
-                        }
-                    }
+                    tag_readings
+                        .borrow_mut()
+                        .entry(reading.tag)
+                        .or_default()
+                        .push(reading);
+                    root.force_update(tag_readings_id);
                 }
             }
         }
