@@ -57,52 +57,39 @@ fn main() -> ! {
     );
 
     loop {
-        let reading = accelerometer.accel_raw().unwrap();
+        defmt::info!("Pinging... for ranging request");
 
-        let total_movement = 0u64
-            .saturating_add(reading.x.abs() as u64)
-            .saturating_add(reading.y.abs() as u64)
-            .saturating_add(reading.z.abs() as u64);
+        // Send the ping
+        let mut pinging = ranging::Ping::new(&mut radio)
+            .unwrap()
+            .send(&mut radio)
+            .unwrap();
 
-        if total_movement < 20_000 {
-            // tag isn't moving. wait 250ms before retrying
-            delay.delay_ms(250u32);
-            continue;
-        }
+        nb::block!(pinging.wait_transmit()).expect("Failed to send data");
 
-        for _ in 0..5 {
-            // Send the ping
-            let mut pinging = ranging::Ping::new(&mut radio)
-                .unwrap()
+        // Wait for the ranging request
+        let mut receiving = radio.receive().expect("Failed to receive message");
+
+        // Set timer for timeout
+        timeout_timer.start(1_000_000u32);
+
+        let result = block_timeout!(&mut timeout_timer, receiving.wait(&mut buf));
+
+        if let Ok(Ok(Some(request))) = result
+            .as_ref()
+            .map(ranging::Request::decode::<Spim<SPIM2>, P0_17<Output<PushPull>>>)
+        {
+            // Return with a ranging response
+            let mut sending = ranging::Response::new(&mut radio, &request)
+                .expect("Failed to initiate response")
                 .send(&mut radio)
-                .unwrap();
+                .expect("Failed to initiate response transmission");
 
-            nb::block!(pinging.wait_transmit()).expect("Failed to send data");
+            timeout_timer.start(100_000u32);
 
-            // Wait for the ranging request
-            let mut receiving = radio.receive().expect("Failed to receive message");
+            nb::block!(sending.wait_transmit()).expect("Failed to send ranging response");
+        };
 
-            // Set timer for timeout
-            timeout_timer.start(1_000_000u32);
-
-            let result = block_timeout!(&mut timeout_timer, receiving.wait(&mut buf));
-
-            if let Ok(Ok(Some(request))) = result
-                .as_ref()
-                .map(ranging::Request::decode::<Spim<SPIM2>, P0_17<Output<PushPull>>>)
-            {
-                // Return with a ranging response
-                let mut sending = ranging::Response::new(&mut radio, &request)
-                    .expect("Failed to initiate response")
-                    .send(&mut radio)
-                    .expect("Failed to initiate response transmission");
-
-                timeout_timer.start(100_000u32);
-
-                nb::block!(sending.wait_transmit()).expect("Failed to send ranging response");
-
-                delay.delay_ms(100u32);
-            };
-        }
+        delay.delay_ms(100u32);
     }
 }

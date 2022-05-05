@@ -99,11 +99,11 @@ fn main() -> ! {
                             tag: addr.0,
                         };
 
-                        if chip
-                            .uart
-                            .write(postcard::to_slice(&msg, &mut uart_buf).unwrap())
-                            .is_err()
-                        {
+                        use zerocopy::AsBytes;
+                        let bytes = msg.as_bytes();
+
+                        // .write(postcard::to_slice(&msg, &mut uart_buf).unwrap())
+                        if chip.uart.write(bytes).is_err() {
                             defmt::error!("Failed to write to uart");
                         };
                     }

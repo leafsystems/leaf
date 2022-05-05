@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use uart_types::DataReading;
 
 use crate::components::tables::{ListingRow, SiteListing};
 use crate::providers::hardware::{self, GatewayInfo};
@@ -9,12 +10,23 @@ pub struct LocalizedPosition {
     pub id: u16,
 }
 
-pub fn use_localized_data(cx: &ScopeState) -> &Vec<LocalizedPosition> {
-    let anchor_readings = use_atom_ref(&cx, hardware::RAW_READINGS);
-    let tag_readings = use_atom_ref(&cx, hardware::TAG_READINGS);
+pub fn use_localized_data(
+    cx: &ScopeState,
+) -> (
+    &Vec<LocalizedPosition>,
+    Option<DataReading>,
+    Option<DataReading>,
+) {
+    let anchor_readings = use_atom_ref(cx, hardware::RAW_READINGS);
+    let tag_readings = use_atom_ref(cx, hardware::TAG_READINGS);
 
     let data = cx.use_hook(|_| vec![]);
+
     data.clear();
+
+    let mut a1_tag_reading = None;
+    let mut a2_tag_reading = None;
+
     for (tag_id, tag_readings) in tag_readings.read().iter() {
         let mut _anchors = anchor_readings.read();
         let mut anchors = _anchors.iter();
@@ -22,22 +34,24 @@ pub fn use_localized_data(cx: &ScopeState) -> &Vec<LocalizedPosition> {
         let a2_reading = anchors.next();
 
         if let (Some((a1_id, a1)), Some((a2_id, a2))) = (a1_reading, a2_reading) {
-            let a1_tag_reading = a1.get(tag_id).and_then(|f| f.last());
-            let a2_tag_reading = a2.get(tag_id).and_then(|f| f.last());
+            a1_tag_reading = a1.get(tag_id).and_then(|f| f.last()).cloned();
+            a2_tag_reading = a2.get(tag_id).and_then(|f| f.last()).cloned();
 
             if let (Some(a1_reading), Some(a2_reading)) = (a1_tag_reading, a2_tag_reading) {
                 let intersections = get_intersections(
                     0.0,
                     0.0,
                     a2_reading.distance_mm as f64,
-                    2800.0,
+                    3200.0,
                     0.0,
                     a1_reading.distance_mm as f64,
                 );
 
                 if let Some((x3, y3, x4, y4)) = intersections {
-                    let x = 100.0 * x4 as f64 / 1000.0;
-                    let y = 100.0 * y4 as f64 / 2000.0;
+                    let x = 100.0 * x4 as f64 / 3200.0;
+                    let y = (100.0 * y4 as f64 / 6400.0) - 10.0;
+
+                    log::info!("Successfully localized {:?}", (x, y));
 
                     data.push(LocalizedPosition { x, y, id: *tag_id });
                 }
@@ -45,7 +59,7 @@ pub fn use_localized_data(cx: &ScopeState) -> &Vec<LocalizedPosition> {
         }
     }
 
-    data
+    (data, a1_tag_reading, a2_tag_reading)
 }
 
 pub fn get_intersections(

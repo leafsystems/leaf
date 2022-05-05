@@ -15,7 +15,6 @@ heapless = "0.7.10"
 nb = "1.0.0"
 dwm1001 = { version = "0.6.0", features = [
     "rt",
-    "dev",
 ], git = "https://github.com/jkelleyrtp/dw1000-rs", branch = "jk/tweak-api-ergonomics" }
 cortex-m-rt = "*"
 defmt = "0.3.0"
@@ -29,6 +28,7 @@ rubble = "0.0.4"
 rubble-nrf5x = { version = "0.0.4", features = ["52832"] }
 disc = { path = "../../../../spinsense/packages/firmware" }
 shared-bus = "0.2.3"
+zerocopy = "0.6.1"
 
 [dependencies.nrf52832-hal]
 version = "0.14.0"

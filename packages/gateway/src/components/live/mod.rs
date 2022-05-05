@@ -6,15 +6,25 @@ use crate::providers::localization::*;
 
 #[inline_props]
 pub fn Live(cx: Scope) -> Element {
-    let data = use_localized_data(&cx);
+    let (data, r1, r2) = use_localized_data(&cx);
+
+    let banner = match (r1, r2) {
+        (None, None) => rsx! { "No readings" },
+        (None, Some(r2)) => rsx! { "r2: {r2.distance_mm}" },
+        (Some(r1), None) => rsx! { "r1: {r1.distance_mm}" },
+        (Some(r1), Some(r2)) => rsx! {
+           "r2: {r2.distance_mm}"
+           "r1: {r1.distance_mm}"
+        },
+    };
 
     cx.render(rsx! {
         div {
             div { class: "flex flex-row",
                 LivePosition {
-                    data: data,
+                    data: data
                 }
-                div { }
+                h1 { banner }
             }
             AnchorList {}
             TagList {}

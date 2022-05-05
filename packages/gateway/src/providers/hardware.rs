@@ -74,6 +74,19 @@ fn use_poll_gateway(cx: &ScopeState, gateway: Atom<Option<GatewayInfo>>, port_id
                     .open_native_async()
                     .unwrap();
 
+                port.flush().await.unwrap();
+
+                // empty the buffer
+                //
+                // loop {
+                //     let mut pool = vec![];
+                //     let bytes_pending = port.read_to_end(&mut pool).await.unwrap();
+                //     dbg!(bytes_pending);
+                //     if bytes_pending == 0 {
+                //         break;
+                //     }
+                // }
+
                 log::debug!("Connected to gateway {}", info.port_name);
 
                 root.set(
@@ -87,25 +100,61 @@ fn use_poll_gateway(cx: &ScopeState, gateway: Atom<Option<GatewayInfo>>, port_id
 
                 let mut reading = DataReading::default();
 
-                while port.read_exact(reading.as_bytes_mut()).await.is_ok() {
-                    log::debug!("Reading: {:?}", reading);
+                loop {
+                    let bytes = port.read_exact(reading.as_bytes_mut()).await;
 
-                    readings
-                        .borrow_mut()
-                        .entry(reading.anchor)
-                        .or_default()
-                        .entry(reading.tag)
-                        .or_default()
-                        .push(reading);
-                    root.force_update(readings_id);
+                    if reading.distance_mm > 100000 {
+                        log::debug!("Invalid reading: {}", reading.distance_mm);
+                        port.flush().await;
+                        continue;
+                    }
 
-                    tag_readings
-                        .borrow_mut()
-                        .entry(reading.tag)
-                        .or_default()
-                        .push(reading);
-                    root.force_update(tag_readings_id);
+                    if let Ok(bytes_read) = bytes {
+                        readings
+                            .borrow_mut()
+                            .entry(reading.anchor)
+                            .or_default()
+                            .entry(reading.tag)
+                            .or_default()
+                            .push(reading);
+
+                        tag_readings
+                            .borrow_mut()
+                            .entry(reading.tag)
+                            .or_default()
+                            .push(reading);
+
+                        root.force_update(readings_id);
+                        root.force_update(tag_readings_id);
+                    } else {
+                        log::error!("Failed to read from gateway");
+                        break;
+                    }
+
+                    // delay for 20ms
+                    tokio::time::sleep(Duration::from_millis(20)).await;
                 }
+
+                // while port.read(reading.as_bytes_mut()).await.is_ok() {
+                //     // while port.read(reading.as_bytes_mut()).await.is_ok() {
+                //     log::debug!("Reading: {:?}", reading);
+
+                //     readings
+                //         .borrow_mut()
+                //         .entry(reading.anchor)
+                //         .or_default()
+                //         .entry(reading.tag)
+                //         .or_default()
+                //         .push(reading);
+                //     root.force_update(readings_id);
+
+                //     tag_readings
+                //         .borrow_mut()
+                //         .entry(reading.tag)
+                //         .or_default()
+                //         .push(reading);
+                //     root.force_update(tag_readings_id);
+                // }
             }
         }
     });
